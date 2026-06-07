@@ -290,10 +290,10 @@ export function AboutUs() {
             className="grid grid-cols-1 md:grid-cols-12 gap-3 lg:gap-4 w-full"
             style={{ minHeight: 0 }}
           >
-            {/* CARD 1 — INHABER PORTRAIT (col 1-5, beide Rows) */}
+            {/* CARD 1 — INHABER PORTRAIT (col 1-6, beide Rows — dominanteste Karte) */}
             <div
               data-bento-card
-              className="md:col-span-5 md:row-span-2 relative overflow-hidden flex flex-col"
+              className="md:col-span-6 md:row-span-2 relative overflow-hidden flex flex-col"
               style={{
                 borderRadius: '4px',
                 background: 'rgba(255,255,255,0.5)',
@@ -334,22 +334,31 @@ export function AboutUs() {
               </div>
 
               <div
-                className="relative overflow-hidden flex-1"
-                style={{
-                  borderRadius: '2px',
-                  background: '#d8d3c4',
-                  border: '1px solid rgba(255,255,255,0.7)',
-                  boxShadow:
-                    'inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 24px -12px rgba(14,14,14,0.25)',
-                  minHeight: 0,
-                }}
+                className="relative flex-1 flex items-center justify-center"
+                style={{ minHeight: 0 }}
               >
-                <img
-                  src="/images/inhaber-portrait.jpg"
-                  alt="[Inhaber-Vorname] [Inhaber-Nachname], Gründer und Inhaber von KLARWERK"
-                  className="absolute inset-0 w-full h-full object-cover"
-                  style={{ filter: 'contrast(1.02) saturate(0.95)' }}
-                />
+                {/* Frame haelt das Foto auf 4:5 — nutzt verfuegbare Hoehe maximal,
+                    centered horizontal wenn die Karte breiter ist als das Foto */}
+                <div
+                  className="relative overflow-hidden"
+                  style={{
+                    aspectRatio: '4 / 5',
+                    height: '100%',
+                    maxWidth: '100%',
+                    borderRadius: '2px',
+                    background: '#d8d3c4',
+                    border: '1px solid rgba(255,255,255,0.7)',
+                    boxShadow:
+                      'inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 24px -12px rgba(14,14,14,0.25)',
+                  }}
+                >
+                  <img
+                    src="/images/inhaber-portrait.jpg"
+                    alt="[Inhaber-Vorname] [Inhaber-Nachname], Gründer und Inhaber von KLARWERK"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ filter: 'contrast(1.02) saturate(0.95)' }}
+                  />
+                </div>
               </div>
 
               <div className="mt-3 flex items-baseline justify-between flex-wrap gap-2">
@@ -381,10 +390,10 @@ export function AboutUs() {
               </div>
             </div>
 
-            {/* CARD 2 — LEITSATZ QUOTE (col 6-9, row 1) */}
+            {/* CARD 2 — LEITSATZ QUOTE (col 7-9, row 1) */}
             <div
               data-bento-card
-              className="md:col-span-4"
+              className="md:col-span-3"
               style={{
                 borderRadius: '4px',
                 background:
@@ -500,10 +509,10 @@ export function AboutUs() {
               </p>
             </div>
 
-            {/* CARD 4 — WERTE (col 6-9, row 2) */}
+            {/* CARD 4 — WERTE (col 7-9, row 2) */}
             <div
               data-bento-card
-              className="md:col-span-4"
+              className="md:col-span-3"
               style={{
                 borderRadius: '4px',
                 background: 'rgba(255,255,255,0.4)',
@@ -523,21 +532,21 @@ export function AboutUs() {
                   letterSpacing: '0.22em',
                   textTransform: 'uppercase',
                   color: 'var(--color-ink-secondary)',
-                  margin: '0 0 12px 0',
+                  margin: '0 0 10px 0',
                 }}
               >
                 Werte
               </p>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              <div className="flex flex-col gap-2.5">
                 {VALUES.map((v) => (
                   <div key={v.key} className="flex items-center gap-3">
-                    <div style={{ color: 'var(--color-ink-primary)' }}>
+                    <div style={{ color: 'var(--color-ink-primary)', flexShrink: 0 }}>
                       {v.icon}
                     </div>
                     <p
                       style={{
                         fontFamily: 'var(--font-display)',
-                        fontSize: 'clamp(13px, 1.05vw, 16px)',
+                        fontSize: 'clamp(13px, 1vw, 16px)',
                         letterSpacing: '-0.015em',
                         color: 'var(--color-ink-primary)',
                         margin: 0,
