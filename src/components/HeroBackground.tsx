@@ -1,23 +1,24 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 
 /**
- * Vollflächiger Hero-Hintergrund: echtes 10-Sekunden cinematic Loop-Video
- * (Higgsfield / Kling 3.0 Pro) durchquert einen pristinen, polierten Architektur-Raum
- * mit Marmor-Reflexionen, Glasfassade und warmem Sonnenstrahl.
+ * Vollflaechiger Hero-Hintergrund — vier Reflection-Study-Szenen im Crossfade-Cycle.
  *
- * Datei: public/videos/reflection-study.mp4 (~13 MB, 1080p H.264, autoplay-tauglich).
+ * Slot 0 BÜROFOYER  — Higgsfield Kling 3.0 (5s real video)
+ * Slot 1 KLINIKFLUR — Unsplash photo (5s mit Ken-Burns Zoom)
+ * Slot 2 TREPPENHAUS— Unsplash photo (5s mit Ken-Burns Zoom)
+ * Slot 3 LOBBY      — Higgsfield Kling 3.0 (10s real video)
  *
- * Die dekorativen Szenen-Labels (Foyer / Klinik / Treppenhaus / Lobby) zyklen
- * unabhängig vom Video in 2.5s-Schritten — sie geben dem Editorial-Footer-Strip
- * seinen Rhythmus, sind aber keine wörtliche Abbildung der Video-Inhalte.
+ * Photo-Slots koennen jederzeit gegen Video-Slots getauscht werden, sobald
+ * weitere Higgsfield-Renders verfuegbar sind — der Slot-Type Discriminator
+ * unten ist die einzige Stelle, die anzupassen ist.
  *
- * Overlays (Reihenfolge unten -> oben):
- *  1. Video
- *  2. Dunkles Vertikal-Gradient für Text-Lesbarkeit
- *  3. Warmer Cream-Multiply-Tint für Markenwärme
- *  4. Filmkorn via SVG-Noise
- *  5. Dezente 12-Spalten-Linie (editorial)
+ * Overlays (von unten nach oben):
+ *  1. Media (Video/Photo)
+ *  2. Dunkles Vertikal-Gradient (Text-Lesbarkeit)
+ *  3. Cream-Multiply (Markenwaerme)
+ *  4. Filmkorn (SVG-Noise via data-URI)
+ *  5. Dezente 12-col Editorial-Linien
  */
 
 export type HeroScene = {
@@ -25,14 +26,55 @@ export type HeroScene = {
   label: string
 }
 
-export const HERO_SCENES: HeroScene[] = [
-  { key: 'foyer', label: 'BÜROFOYER' },
-  { key: 'klinik', label: 'KLINIKFLUR' },
-  { key: 'treppenhaus', label: 'TREPPENHAUS' },
-  { key: 'lobby', label: 'LOBBY' },
+type VideoSlot = HeroScene & {
+  type: 'video'
+  src: string
+  poster?: string
+  durationMs: number
+}
+type PhotoSlot = HeroScene & {
+  type: 'photo'
+  src: string
+  durationMs: number
+}
+type Slot = VideoSlot | PhotoSlot
+
+const SLOTS: Slot[] = [
+  {
+    key: 'foyer',
+    label: 'BÜROFOYER',
+    type: 'video',
+    src: '/videos/foyer.mp4',
+    poster:
+      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=2000&h=1300&fit=crop&q=72&auto=format',
+    durationMs: 5000,
+  },
+  {
+    key: 'klinik',
+    label: 'KLINIKFLUR',
+    type: 'photo',
+    src: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=2000&h=1300&fit=crop&q=75&auto=format',
+    durationMs: 5000,
+  },
+  {
+    key: 'treppenhaus',
+    label: 'TREPPENHAUS',
+    type: 'photo',
+    src: 'https://images.unsplash.com/photo-1564540583246-934409427776?w=2000&h=1300&fit=crop&q=75&auto=format',
+    durationMs: 5000,
+  },
+  {
+    key: 'lobby',
+    label: 'LOBBY',
+    type: 'video',
+    src: '/videos/lobby.mp4',
+    poster:
+      'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=2000&h=1300&fit=crop&q=72&auto=format',
+    durationMs: 10000,
+  },
 ]
 
-const SCENE_DURATION_MS = 2500
+export const HERO_SCENES: HeroScene[] = SLOTS.map(({ key, label }) => ({ key, label }))
 
 type Props = {
   onSceneChange?: (index: number, scene: HeroScene) => void
@@ -41,18 +83,42 @@ type Props = {
 export function HeroBackground({ onSceneChange }: Props) {
   const [active, setActive] = useState(0)
   const reduced = useReducedMotion()
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
 
+  // Cycle through slots — jede Szene hat ihre eigene durationMs
   useEffect(() => {
     if (reduced) return
-    const id = window.setInterval(() => {
-      setActive((s) => (s + 1) % HERO_SCENES.length)
-    }, SCENE_DURATION_MS)
-    return () => window.clearInterval(id)
-  }, [reduced])
+    const id = window.setTimeout(() => {
+      setActive((s) => (s + 1) % SLOTS.length)
+    }, SLOTS[active].durationMs)
+    return () => window.clearTimeout(id)
+  }, [active, reduced])
 
+  // Notify parent (eyebrow + footer-strip) ueber Szenen-Wechsel
   useEffect(() => {
-    onSceneChange?.(active, HERO_SCENES[active])
+    onSceneChange?.(active, SLOTS[active])
   }, [active, onSceneChange])
+
+  // Video-Lifecycle: aktives Video startet von vorne + play(), andere pausieren
+  useEffect(() => {
+    SLOTS.forEach((slot, i) => {
+      if (slot.type !== 'video') return
+      const v = videoRefs.current[i]
+      if (!v) return
+      if (i === active) {
+        try {
+          v.currentTime = 0
+        } catch {
+          /* race condition wenn Video noch nicht ready */
+        }
+        v.play().catch(() => {
+          /* autoplay-policy oder noch nicht ready */
+        })
+      } else {
+        v.pause()
+      }
+    })
+  }, [active])
 
   return (
     <div
@@ -60,20 +126,61 @@ export function HeroBackground({ onSceneChange }: Props) {
       className="absolute inset-0 overflow-hidden pointer-events-none"
       style={{ backgroundColor: '#0a0a0a' }}
     >
-      {/* Echtes cinematic Loop-Video */}
-      <video
-        src="/videos/reflection-study.mp4"
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
-        poster="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=2000&h=1300&fit=crop&q=72&auto=format"
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ willChange: 'transform' }}
-      />
+      {SLOTS.map((slot, i) => {
+        const isActive = active === i
+        const commonStyle: React.CSSProperties = {
+          opacity: isActive ? 1 : 0,
+          transition: reduced
+            ? 'none'
+            : 'opacity 1500ms cubic-bezier(0.25, 1, 0.5, 1)',
+          willChange: 'opacity, transform',
+        }
 
-      {/* Overlay 1: dunkles Vertikal-Gradient (Top + Bottom dunkler für Lesbarkeit) */}
+        if (slot.type === 'video') {
+          return (
+            <video
+              key={slot.key}
+              ref={(el) => {
+                videoRefs.current[i] = el
+              }}
+              src={slot.src}
+              poster={slot.poster}
+              loop
+              muted
+              playsInline
+              preload="auto"
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{
+                ...commonStyle,
+                // sanfter Ken-Burns auch ueber Video, um Statik zu vermeiden
+                transform: isActive ? 'scale(1.05)' : 'scale(1.02)',
+                transitionProperty: 'opacity, transform',
+                transitionDuration: `1500ms, ${slot.durationMs + 1500}ms`,
+              }}
+            />
+          )
+        }
+
+        // photo slot — Ken-Burns Zoom synchron mit Slot-Dauer
+        return (
+          <img
+            key={slot.key}
+            src={slot.src}
+            alt=""
+            loading={i === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{
+              ...commonStyle,
+              transform: isActive ? 'scale(1.08)' : 'scale(1.02)',
+              transitionProperty: 'opacity, transform',
+              transitionDuration: `1500ms, ${slot.durationMs + 1500}ms`,
+            }}
+          />
+        )
+      })}
+
+      {/* Overlay 1: dunkles Vertikal-Gradient */}
       <div
         className="absolute inset-0"
         style={{
