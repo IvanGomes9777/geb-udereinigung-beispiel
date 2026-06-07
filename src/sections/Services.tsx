@@ -83,26 +83,33 @@ export function Services() {
   const reduced = useReducedMotion()
   const [active, setActive] = useState(0)
 
-  // ---------- HEAD reveal (laeuft bevor pin engaged) ----------
+  // ---------- HEAD reveal — fromTo mit immediateRender:false
+  //    damit Content sichtbar bleibt wenn ScrollTrigger nicht zuverlaessig
+  //    feuert (z.B. Reload mitten in der Section).
   useEffect(() => {
     const sectionEl = sectionRef.current
     if (!sectionEl) return
+    if (reduced) return
     const ctx = gsap.context(() => {
-      if (reduced) return
       const headEls = headRef.current?.children
-      if (headEls) {
-        gsap.from(headEls, {
-          y: 36,
-          opacity: 0,
-          duration: 1.2,
-          stagger: 0.15,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 78%',
-            once: true,
-          },
-        })
+      if (headEls && headEls.length > 0) {
+        gsap.fromTo(
+          headEls,
+          { y: 36, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1.2,
+            stagger: 0.15,
+            ease: 'expo.out',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: sectionEl,
+              start: 'top 92%',
+              once: true,
+            },
+          }
+        )
       }
     }, sectionEl)
     return () => ctx.revert()

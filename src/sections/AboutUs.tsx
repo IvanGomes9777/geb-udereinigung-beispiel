@@ -84,22 +84,27 @@ export function AboutUs() {
         }
       )
 
-      // 2) HEAD reveal — Eyebrow + Title staggern langsam beim Eintritt rein.
-      //    Triggert frueh (top 78%) damit man sie vor und beim Stop sieht.
+      // 2) HEAD reveal — fromTo + immediateRender:false damit Content
+      //    sichtbar bleibt wenn ScrollTrigger nicht zuverlaessig feuert.
       const headElements = headRef.current?.children
-      if (headElements) {
-        gsap.from(headElements, {
-          y: 36,
-          opacity: 0,
-          duration: 1.4,
-          stagger: 0.18,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 78%',
-            once: true,
-          },
-        })
+      if (headElements && headElements.length > 0) {
+        gsap.fromTo(
+          headElements,
+          { y: 36, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1.4,
+            stagger: 0.18,
+            ease: 'expo.out',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: sectionEl,
+              start: 'top 92%',
+              once: true,
+            },
+          }
+        )
       }
 
       // 3) BENTO Cards Magic-Mosaik — jede Karte sichtbar einzeln ankommen.
@@ -113,52 +118,31 @@ export function AboutUs() {
       ]
       cards.forEach((card, i) => {
         const d = dirs[i % dirs.length]
-        gsap.from(card, {
-          x: d.x,
-          y: d.y,
-          opacity: 0,
-          duration: 1.5,
-          delay: 0.3 + i * 0.22,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 70%',
-            once: true,
-          },
-        })
+        gsap.fromTo(
+          card,
+          { x: d.x, y: d.y, opacity: 0 },
+          {
+            x: 0,
+            y: 0,
+            opacity: 1,
+            duration: 1.5,
+            delay: 0.3 + i * 0.22,
+            ease: 'expo.out',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: sectionEl,
+              start: 'top 88%',
+              once: true,
+            },
+          }
+        )
       })
 
-      // 4) Pull-Quote Wort-Stagger — gemaechlich, Lese-Tempo.
-      const quote = sectionRef.current?.querySelector<HTMLElement>(
-        '[data-mission-quote]'
-      )
-      if (quote && quote.textContent) {
-        const words = quote.textContent.split(' ')
-        quote.textContent = ''
-        words.forEach((w, i) => {
-          const span = document.createElement('span')
-          span.textContent = (i === 0 ? '' : ' ') + w
-          span.style.opacity = '0'
-          span.style.display = 'inline-block'
-          span.style.transform = 'translateY(0.4em)'
-          quote.appendChild(span)
-        })
-        gsap.to(quote.children, {
-          opacity: 1,
-          y: 0,
-          duration: 1.0,
-          ease: 'expo.out',
-          stagger: 0.09,
-          scrollTrigger: {
-            trigger: quote,
-            start: 'top 88%',
-            once: true,
-          },
-        })
-      }
+      // 4) Pull-Quote: einfacher Fade — kein Text-Manipulation mehr,
+      //    Quote bleibt bei Mount sichtbar.
 
       // 5) Counter-Animation — laenger zaehlend, sichtbar bis zur Endzahl.
-      const counters = gsap.utils.toArray<HTMLElement>('[data-counter]')
+      const counters = sectionEl.querySelectorAll<HTMLElement>('[data-counter]')
       counters.forEach((el) => {
         const target = parseFloat(el.dataset.counter || '0')
         const decimals = (el.dataset.counter || '0').split('.')[1]?.length || 0
@@ -168,6 +152,7 @@ export function AboutUs() {
           duration: 2.6,
           ease: 'expo.out',
           onUpdate: () => {
+            if (!el || !el.isConnected) return
             el.textContent = proxy.v.toFixed(decimals).replace('.', ',')
           },
           scrollTrigger: {
