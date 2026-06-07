@@ -1,0 +1,76 @@
+/* ============================================================
+   KLARWERK — Design Tokens
+   Option C: Editorial Brutalism × Soft Morphism
+   ============================================================ */
+
+@theme {
+  /* ---------- Colors ---------- */
+  --color-bg-base: #efede7;
+  --color-ink-primary: #0e0e0e;
+  --color-ink-secondary: #5c5a54;
+  --color-ink-muted: #8a8780;
+  --color-accent: #ff5722;
+  --color-accent-hover: #ff7043;
+  --color-glass-tint: rgba(255, 255, 255, 0.55);
+  --color-glass-border: rgba(14, 14, 14, 0.08);
+  --color-line: rgba(14, 14, 14, 0.12);
+
+  /* ---------- Typography ---------- */
+  --font-display: 'Fraunces', 'GT Sectra', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  --font-body: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* ---------- Spacing & Grid ---------- */
+  --spacing-gutter: 24px;
+  --container-max: 1440px;
+  --grid-cols: 12;
+
+  /* ---------- Motion ---------- */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
+
+  /* ---------- Breakpoints (mirror) ---------- */
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1440px;
+}
+
+/* ---------- Base resets / global ---------- */
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--color-bg-base);
+  color: var(--color-ink-primary);
+  font-family: var(--font-body);
+  font-feature-settings: 'ss01', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg-base);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
