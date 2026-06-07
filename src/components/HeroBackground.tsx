@@ -57,8 +57,8 @@ const SLOTS: Slot[] = [
     durationMs: 5000,
   },
   {
-    key: 'treppenhaus',
-    label: 'TREPPENHAUS',
+    key: 'interieur',
+    label: 'INTERIEUR',
     type: 'photo',
     src: 'https://images.unsplash.com/photo-1564540583246-934409427776?w=2000&h=1300&fit=crop&q=75&auto=format',
     durationMs: 5000,
