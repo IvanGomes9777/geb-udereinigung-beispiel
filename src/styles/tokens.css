@@ -1,10 +1,34 @@
 /* ============================================================
    KLARWERK — Design Tokens
    Option C: Editorial Brutalism × Soft Morphism
+
+   WICHTIG: Tailwind v4 @theme purgt CSS-Variablen die nicht in
+   Tailwind-Utilities verwendet werden. Inline-Styles mit
+   style={{ ... var(--xyz) ... }} werden vom Purger NICHT erkannt.
+   Loesung: zusaetzlich ALLE Token in einem normalen :root-Block
+   deklarieren, der nicht gepurgt wird.
    ============================================================ */
 
 @theme {
-  /* ---------- Colors ---------- */
+  /* Diese hier werden auch via Tailwind-Utility-Klassen genutzt (bg-bg-base etc.) */
+  --color-bg-base: #efede7;
+  --color-ink-primary: #0e0e0e;
+  --color-ink-secondary: #5c5a54;
+  --color-ink-muted: #8a8780;
+  --color-accent: #ff5722;
+  --color-accent-hover: #ff7043;
+  --font-display: 'Fraunces', 'GT Sectra', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  --font-body: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ============================================================
+   :root — alle Tokens nochmal, immune gegen Tailwind-Purge.
+   ============================================================ */
+:root {
+  color-scheme: light;
+
+  /* Colors */
   --color-bg-base: #efede7;
   --color-ink-primary: #0e0e0e;
   --color-ink-secondary: #5c5a54;
@@ -15,21 +39,24 @@
   --color-glass-border: rgba(14, 14, 14, 0.08);
   --color-line: rgba(14, 14, 14, 0.12);
 
-  /* ---------- Typography ---------- */
+  /* Typography */
   --font-display: 'Fraunces', 'GT Sectra', Georgia, serif;
   --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
   --font-body: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* ---------- Spacing & Grid ---------- */
+  /* Spacing & Grid — Container ist die kritische Variable.
+     1840px deckt Standard-Desktop bis 4K ab. Auf Ultra-Wide
+     bleibt etwas Whitespace links/rechts (editorial), aber
+     Content sieht nicht mehr verquetscht aus. */
   --spacing-gutter: 24px;
-  --container-max: 1840px;  /* hoch genug fuer 21:9 / 4K Ultra-Wide */
+  --container-max: 1840px;
   --grid-cols: 12;
 
-  /* ---------- Motion ---------- */
+  /* Motion */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
 
-  /* ---------- Breakpoints (mirror) ---------- */
+  /* Breakpoints (mirror) */
   --breakpoint-xs: 480px;
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
@@ -37,11 +64,7 @@
   --breakpoint-xl: 1440px;
 }
 
-/* ---------- Base resets / global ---------- */
-:root {
-  color-scheme: light;
-}
-
+/* Base resets / global */
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
@@ -54,14 +77,13 @@ body::-webkit-scrollbar,
 *::-webkit-scrollbar {
   width: 0;
   height: 0;
-  display: none; /* Chrome/Safari/Webkit */
+  display: none;
 }
 
 body {
   background-color: var(--color-bg-base);
   color: var(--color-ink-primary);
   font-family: var(--font-body);
-  font-feature-settings: 'ss01', 'cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
