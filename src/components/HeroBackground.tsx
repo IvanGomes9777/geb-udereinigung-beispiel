@@ -2,52 +2,37 @@ import { useEffect, useState } from 'react'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 
 /**
- * Vollflächiger Foto-Hintergrund für den Hero — vier reale Architektur-Szenen
- * im Crossfade-Loop mit subtiler Ken-Burns-Bewegung.
+ * Vollflächiger Hero-Hintergrund: echtes 10-Sekunden cinematic Loop-Video
+ * (Higgsfield / Kling 3.0 Pro) durchquert einen pristinen, polierten Architektur-Raum
+ * mit Marmor-Reflexionen, Glasfassade und warmem Sonnenstrahl.
  *
- * Scenes (je 4.5s sichtbar, 1.5s Crossfade):
- *  0 — Bürofoyer / Marmor + Glas
- *  1 — Klinikflur / sterile Perspektive
- *  2 — Altbau-Treppenhaus
- *  3 — Moderne Lobby / Empfangshalle
+ * Datei: public/videos/reflection-study.mp4 (~13 MB, 1080p H.264, autoplay-tauglich).
  *
- * Overlays von oben nach unten:
- *  - Photo (cover, scale 1 → 1.08 über Standzeit, Ken Burns)
- *  - Dunkles Vertikal-Gradient (für Text-Lesbarkeit)
- *  - Cream-Tint via multiply (Markenwärme behalten)
- *  - Filmkorn (SVG-Noise via data-URI)
+ * Die dekorativen Szenen-Labels (Foyer / Klinik / Treppenhaus / Lobby) zyklen
+ * unabhängig vom Video in 2.5s-Schritten — sie geben dem Editorial-Footer-Strip
+ * seinen Rhythmus, sind aber keine wörtliche Abbildung der Video-Inhalte.
+ *
+ * Overlays (Reihenfolge unten -> oben):
+ *  1. Video
+ *  2. Dunkles Vertikal-Gradient für Text-Lesbarkeit
+ *  3. Warmer Cream-Multiply-Tint für Markenwärme
+ *  4. Filmkorn via SVG-Noise
+ *  5. Dezente 12-Spalten-Linie (editorial)
  */
 
 export type HeroScene = {
   key: string
   label: string
-  url: string
 }
 
 export const HERO_SCENES: HeroScene[] = [
-  {
-    key: 'foyer',
-    label: 'BÜROFOYER',
-    url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=2000&h=1300&fit=crop&q=72&auto=format',
-  },
-  {
-    key: 'klinik',
-    label: 'KLINIKFLUR',
-    url: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=2000&h=1300&fit=crop&q=72&auto=format',
-  },
-  {
-    key: 'treppenhaus',
-    label: 'TREPPENHAUS',
-    url: 'https://images.unsplash.com/photo-1564540583246-934409427776?w=2000&h=1300&fit=crop&q=72&auto=format',
-  },
-  {
-    key: 'lobby',
-    label: 'LOBBY',
-    url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=2000&h=1300&fit=crop&q=72&auto=format',
-  },
+  { key: 'foyer', label: 'BÜROFOYER' },
+  { key: 'klinik', label: 'KLINIKFLUR' },
+  { key: 'treppenhaus', label: 'TREPPENHAUS' },
+  { key: 'lobby', label: 'LOBBY' },
 ]
 
-const SCENE_DURATION_MS = 4500
+const SCENE_DURATION_MS = 2500
 
 type Props = {
   onSceneChange?: (index: number, scene: HeroScene) => void
@@ -75,26 +60,18 @@ export function HeroBackground({ onSceneChange }: Props) {
       className="absolute inset-0 overflow-hidden pointer-events-none"
       style={{ backgroundColor: '#0a0a0a' }}
     >
-      {/* Photo cycle */}
-      {HERO_SCENES.map((scene, i) => (
-        <img
-          key={scene.key}
-          src={scene.url}
-          alt=""
-          loading={i === 0 ? 'eager' : 'lazy'}
-          decoding="async"
-          fetchPriority={i === 0 ? 'high' : 'low'}
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{
-            opacity: active === i ? 1 : 0,
-            transform: active === i ? 'scale(1.08)' : 'scale(1.02)',
-            transition: reduced
-              ? 'none'
-              : `opacity 1500ms cubic-bezier(0.25, 1, 0.5, 1), transform ${SCENE_DURATION_MS + 1500}ms linear`,
-            willChange: 'opacity, transform',
-          }}
-        />
-      ))}
+      {/* Echtes cinematic Loop-Video */}
+      <video
+        src="/videos/reflection-study.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        poster="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=2000&h=1300&fit=crop&q=72&auto=format"
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ willChange: 'transform' }}
+      />
 
       {/* Overlay 1: dunkles Vertikal-Gradient (Top + Bottom dunkler für Lesbarkeit) */}
       <div
@@ -102,26 +79,26 @@ export function HeroBackground({ onSceneChange }: Props) {
         style={{
           background: `linear-gradient(
             180deg,
-            rgba(14,14,14,0.55) 0%,
-            rgba(14,14,14,0.30) 22%,
-            rgba(14,14,14,0.25) 50%,
-            rgba(14,14,14,0.55) 85%,
-            rgba(14,14,14,0.80) 100%
+            rgba(14,14,14,0.58) 0%,
+            rgba(14,14,14,0.32) 22%,
+            rgba(14,14,14,0.28) 50%,
+            rgba(14,14,14,0.58) 85%,
+            rgba(14,14,14,0.82) 100%
           )`,
         }}
       />
 
-      {/* Overlay 2: warmer Cream-Tint via multiply — gibt Marken-Wärme zurück */}
+      {/* Overlay 2: warmer Cream-Tint via multiply */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(160deg, rgba(70,55,30,0.18) 0%, rgba(40,30,15,0.28) 100%)',
+            'linear-gradient(160deg, rgba(70,55,30,0.20) 0%, rgba(40,30,15,0.30) 100%)',
           mixBlendMode: 'multiply',
         }}
       />
 
-      {/* Overlay 3: Filmkorn (kein extra HTTP-request — SVG-Noise als data-URI) */}
+      {/* Overlay 3: Filmkorn */}
       <div
         className="absolute inset-0 opacity-[0.08]"
         style={{
@@ -130,7 +107,7 @@ export function HeroBackground({ onSceneChange }: Props) {
         }}
       />
 
-      {/* Overlay 4: editoriale 12-Spalten-Linie sehr dezent in Cream */}
+      {/* Overlay 4: editoriale 12-col Linie */}
       <div
         className="absolute inset-0 opacity-[0.07]"
         style={{
