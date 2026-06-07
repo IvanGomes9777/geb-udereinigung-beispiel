@@ -109,6 +109,27 @@ export function Hero() {
           { x: 24, opacity: 0, duration: 0.95 },
           '-=0.75'
         )
+
+      // ---------- SECTION EXIT FADE ----------
+      // Hero faded raus wenn User runterscrollt, kommt zurueck beim Hochscrollen.
+      // Scrub: 1.2 macht die Bewegung weich an die Scrollgeschwindigkeit gekoppelt.
+      if (innerRef.current) {
+        gsap.fromTo(
+          innerRef.current,
+          { opacity: 1, y: 0 },
+          {
+            opacity: 0.15,
+            y: -80,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: sectionEl,
+              start: 'top top',
+              end: 'bottom top',
+              scrub: 1.2,
+            },
+          }
+        )
+      }
     }, sectionEl)
 
     return () => ctx.revert()

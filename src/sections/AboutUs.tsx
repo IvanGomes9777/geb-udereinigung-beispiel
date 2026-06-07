@@ -84,62 +84,87 @@ export function AboutUs() {
         }
       )
 
-      // 2) HEAD reveal — fromTo + immediateRender:false damit Content
-      //    sichtbar bleibt wenn ScrollTrigger nicht zuverlaessig feuert.
+      // 2 + 3) ENTRANCE — Scrub-Timeline: HEAD + Cards kommen progressiv rein,
+      //    an die Scrollposition gekoppelt. Kein Flash-Bug, User sieht jede
+      //    Karte einzeln aufploppen waehrend er in die Section scrollt.
       const headElements = headRef.current?.children
+      const cards = gsap.utils.toArray<HTMLElement>('[data-bento-card]')
+      const dirs = [
+        { x: -60, y: 0 },
+        { x: 0, y: -50 },
+        { x: 0, y: 50 },
+        { x: 60, y: 0 },
+      ]
+
+      const entranceTL = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionEl,
+          start: 'top bottom',   // Section beginnt von unten reinzukommen
+          end: 'center center',  // Section ist mittig im Viewport (~doppelt so viel Scroll-Range)
+          scrub: 2,              // weiches Nachlaufen — smoother
+        },
+      })
+
+      // HEAD: erste ~30% der Timeline — langsamer, klarer Stagger
       if (headElements && headElements.length > 0) {
-        gsap.fromTo(
+        entranceTL.fromTo(
           headElements,
-          { y: 36, opacity: 0 },
+          { y: 48, opacity: 0 },
           {
             y: 0,
             opacity: 1,
-            duration: 1.4,
-            stagger: 0.18,
-            ease: 'expo.out',
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: sectionEl,
-              start: 'top 92%',
-              once: true,
-            },
-          }
+            stagger: 0.3,
+            ease: 'power2.out',
+            duration: 0.9,
+          },
+          0
         )
       }
 
-      // 3) BENTO Cards Magic-Mosaik — jede Karte sichtbar einzeln ankommen.
-      //    Grosser Stagger (220ms) macht die Reihenfolge wahrnehmbar.
-      const cards = gsap.utils.toArray<HTMLElement>('[data-bento-card]')
-      const dirs = [
-        { x: -50, y: 0 },
-        { x: 0, y: -40 },
-        { x: 0, y: 40 },
-        { x: 50, y: 0 },
-      ]
+      // CARDS: jede Karte hat einen klaren eigenen Scroll-Slot (0.7s Spacing,
+      // 1.4s Duration) — User scrollt rein und sieht Card 1, scrollt etwas mehr
+      // → Card 2 erscheint, usw.
       cards.forEach((card, i) => {
         const d = dirs[i % dirs.length]
-        gsap.fromTo(
+        entranceTL.fromTo(
           card,
           { x: d.x, y: d.y, opacity: 0 },
           {
             x: 0,
             y: 0,
             opacity: 1,
-            duration: 1.5,
-            delay: 0.3 + i * 0.22,
-            ease: 'expo.out',
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: sectionEl,
-              start: 'top 88%',
-              once: true,
-            },
-          }
+            duration: 1.4,
+            ease: 'power3.out',
+          },
+          0.8 + i * 0.7
         )
       })
 
       // 4) Pull-Quote: einfacher Fade — kein Text-Manipulation mehr,
       //    Quote bleibt bei Mount sichtbar.
+
+      // 4b) SECTION EXIT FADE — AboutUs faded raus wenn User in Services
+      //     reinscrollt, kommt zurueck beim Hochscrollen.
+      const innerContent = sectionEl.querySelector<HTMLDivElement>(
+        ':scope > div.relative.flex-1'
+      )
+      if (innerContent) {
+        gsap.fromTo(
+          innerContent,
+          { opacity: 1, y: 0 },
+          {
+            opacity: 0.15,
+            y: -80,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: sectionEl,
+              start: 'top top',
+              end: 'bottom top',
+              scrub: 1.2,
+            },
+          }
+        )
+      }
 
       // 5) Counter-Animation — laenger zaehlend, sichtbar bis zur Endzahl.
       const counters = sectionEl.querySelectorAll<HTMLElement>('[data-counter]')
@@ -149,15 +174,15 @@ export function AboutUs() {
         const proxy = { v: 0 }
         gsap.to(proxy, {
           v: target,
-          duration: 2.6,
-          ease: 'expo.out',
+          duration: 3.6,
+          ease: 'power3.out',
           onUpdate: () => {
             if (!el || !el.isConnected) return
             el.textContent = proxy.v.toFixed(decimals).replace('.', ',')
           },
           scrollTrigger: {
             trigger: el,
-            start: 'top 92%',
+            start: 'top 75%',
             once: true,
           },
         })
@@ -172,7 +197,8 @@ export function AboutUs() {
       id="ueber-uns"
       className="relative w-full overflow-hidden flex flex-col"
       style={{
-        minHeight: '100dvh',
+        height: '100dvh',
+        minHeight: '600px',
         backgroundColor: '#e9e4d6',
       }}
     >
@@ -202,13 +228,14 @@ export function AboutUs() {
         style={{
           maxWidth: 'var(--container-max)',
           zIndex: 2,
-          paddingTop: 'clamp(56px, 7vh, 80px)',
-          paddingBottom: 'clamp(48px, 6vh, 64px)',
+          minHeight: 0,
+          paddingTop: 'clamp(40px, 5vh, 72px)',
+          paddingBottom: 'clamp(32px, 4vh, 56px)',
         }}
       >
         {/* ZONE 1 — HEAD: Eyebrow + kompakter Title */}
         <div ref={headRef}>
-          <div className="flex items-baseline justify-between flex-wrap gap-3 mb-4 lg:mb-6">
+          <div className="flex items-baseline justify-between flex-wrap gap-3 mb-3 lg:mb-4">
             <p
               style={{
                 fontFamily: 'var(--font-mono)',
@@ -267,7 +294,7 @@ export function AboutUs() {
 
         {/* ZONE 2 — BENTO Grid mit 3 Rows. Portrait spannt alle 3, ist damit 3x so hoch
             wie jede der drei rechten Karten. */}
-        <div className="flex-1 flex items-stretch mt-6 lg:mt-8" style={{ minHeight: 0 }}>
+        <div className="flex-1 flex items-stretch mt-4 lg:mt-6" style={{ minHeight: 0 }}>
           <div
             className="grid grid-cols-1 md:grid-cols-12 md:grid-rows-3 gap-3 lg:gap-4 w-full"
             style={{ minHeight: 0 }}
@@ -284,15 +311,18 @@ export function AboutUs() {
                 border: '1px solid rgba(255,255,255,0.65)',
                 boxShadow:
                   'inset 0 1px 0 rgba(255,255,255,0.85), 0 24px 50px -28px rgba(14,14,14,0.22)',
-                minHeight: '400px',
+                minHeight: 0,
               }}
             >
-              {/* Photo — edge-to-edge */}
+              {/* Photo — vollstaendig sichtbar (kein Crop), zentriert mit Beige-Letterbox */}
               <img
                 src="/images/inhaber-portrait.jpg"
                 alt="[Inhaber-Vorname] [Inhaber-Nachname], Gründer und Inhaber von KLARWERK"
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ filter: 'contrast(1.03) saturate(0.96)' }}
+                className="absolute inset-0 w-full h-full object-contain"
+                style={{
+                  objectPosition: 'center',
+                  filter: 'contrast(1.03) saturate(0.96)',
+                }}
               />
 
               {/* Top-Gradient fuer Mono-Labels Lesbarkeit */}
@@ -568,7 +598,7 @@ export function AboutUs() {
 
         {/* ZONE 3 — TRUST STRIP (Certs als Mono-Inline) */}
         <div
-          className="mt-6 lg:mt-8 pt-4 flex items-center justify-between gap-4 flex-wrap"
+          className="mt-4 lg:mt-6 pt-3 flex items-center justify-between gap-4 flex-wrap"
           style={{
             borderTop: '1px solid rgba(14,14,14,0.12)',
             fontFamily: 'var(--font-mono)',

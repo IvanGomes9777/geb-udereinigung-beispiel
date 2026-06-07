@@ -10,6 +10,7 @@ const NAV_ITEMS = [
 
 export function Header() {
   const [open, setOpen] = useState(false)
+  const [terminHover, setTerminHover] = useState(false)
 
   // Header ist absolut positioniert ueber dem Hero — scrollt mit dem Hero weg.
   // Schrift immer cream (passt zum dunklen Photo-Hero).
@@ -64,16 +65,35 @@ export function Header() {
             ))}
             <a
               href="#termin"
-              className="ml-4 inline-flex items-center gap-2 px-4 py-2 text-[12px] uppercase transition-all"
+              onMouseEnter={() => setTerminHover(true)}
+              onMouseLeave={() => setTerminHover(false)}
+              className="ml-4 inline-flex items-center gap-2 px-4 py-2 text-[12px] uppercase"
               style={{
                 fontFamily: 'var(--font-mono)',
                 letterSpacing: '0.12em',
-                backgroundColor: '#f5f2eb',
-                color: 'var(--color-ink-primary)',
+                backgroundColor: terminHover ? 'var(--color-accent)' : '#f5f2eb',
+                color: terminHover ? '#f5f2eb' : 'var(--color-ink-primary)',
                 borderRadius: '2px',
+                transform: terminHover ? 'translateY(-2px)' : 'translateY(0)',
+                boxShadow: terminHover
+                  ? '0 10px 22px -10px rgba(255,87,34,0.55)'
+                  : '0 0 0 rgba(0,0,0,0)',
+                transition:
+                  'background-color 240ms cubic-bezier(0.25,1,0.5,1), color 240ms ease, transform 280ms cubic-bezier(0.25,1,0.5,1), box-shadow 280ms ease',
               }}
             >
-              Termin →
+              Termin
+              <span
+                aria-hidden
+                className="inline-block"
+                style={{
+                  transform: terminHover ? 'translateX(4px)' : 'translateX(0)',
+                  transition:
+                    'transform 280ms cubic-bezier(0.25,1,0.5,1)',
+                }}
+              >
+                →
+              </span>
             </a>
           </nav>
 

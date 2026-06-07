@@ -66,7 +66,7 @@
 
 /* Base resets / global */
 html {
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth entfernt — Konflikt mit GSAP ScrollTrigger Pin/Scrub */
   -webkit-text-size-adjust: 100%;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */

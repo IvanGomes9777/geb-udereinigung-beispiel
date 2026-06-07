@@ -32,7 +32,7 @@ const SERVICES: Service[] = [
     n: '02',
     name: 'Büro- & Praxisreinigung',
     slug: 'buero',
-    desc: 'Werktags ausserhalb der Bürozeiten. Eigene Mitarbeiter, NDA, fester Ansprechpartner.',
+    desc: 'Werktags außerhalb der Bürozeiten. Eigene Mitarbeiter, NDA, fester Ansprechpartner.',
     tags: ['Tagesreinigung', 'Glasflächen', 'Sanitär'],
     photo:
       'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=1200&h=1600&fit=crop&q=72&auto=format',
@@ -80,8 +80,21 @@ export function Services() {
   const headRef = useRef<HTMLDivElement>(null)
   const scrollerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
+  const pinTriggerRef = useRef<ScrollTrigger | null>(null)
   const reduced = useReducedMotion()
   const [active, setActive] = useState(0)
+  // isDesktop: nur ab 1024px Pin/Scroll-Jacking. Drunter native horizontale
+  // Swipe-Scroll + kleinere Cards. Detection via matchMedia mit Resize-Listener.
+  const [isDesktop, setIsDesktop] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true
+    return window.matchMedia('(min-width: 1024px)').matches
+  })
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   // ---------- HEAD reveal — fromTo mit immediateRender:false
   //    damit Content sichtbar bleibt wenn ScrollTrigger nicht zuverlaessig
@@ -115,8 +128,59 @@ export function Services() {
     return () => ctx.revert()
   }, [reduced])
 
-  // ---------- ACTIVE CARD DETECTION via Intersection ----------
+  // ---------- PIN + HORIZONTAL SCRUB (Scroll-Jacking) ----------
+  // Vertikales Scrollen pinnt die Section und treibt die Cards horizontal.
+  // Nach der letzten Card wird unpinnt und vertikal scrollt zur naechsten Section.
   useEffect(() => {
+    const section = sectionRef.current
+    const track = trackRef.current
+    const scroller = scrollerRef.current
+    if (!section || !track || !scroller) return
+    // Pin/Scroll-Jacking nur auf Desktop. Mobile/Tablet bekommt native
+    // Horizontal-Swipe-Scroll (siehe scroller overflow + scrollSnapType).
+    if (reduced || !isDesktop) return
+
+    const ctx = gsap.context(() => {
+      const getDistance = () =>
+        Math.max(0, track.scrollWidth - scroller.clientWidth)
+
+      const tween = gsap.to(track, {
+        x: () => -getDistance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: () => `+=${getDistance()}`,
+          pin: true,
+          scrub: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          pinSpacing: true,
+          onUpdate: (self) => {
+            if (SERVICES.length <= 1) return
+            const idx = Math.min(
+              SERVICES.length - 1,
+              Math.round(self.progress * (SERVICES.length - 1))
+            )
+            setActive(idx)
+          },
+        },
+      })
+      pinTriggerRef.current = tween.scrollTrigger as ScrollTrigger
+      // Layout-Settle: nach Fonts/Bilder evtl. neu vermessen
+      requestAnimationFrame(() => ScrollTrigger.refresh())
+    }, section)
+
+    return () => {
+      pinTriggerRef.current = null
+      ctx.revert()
+    }
+  }, [reduced, isDesktop])
+
+  // ---------- FALLBACK Active-Card-Detection fuer Non-Pin-Modus ----------
+  // (Reduced-Motion ODER Mobile/Tablet — beides nutzt native Horizontal-Scroll)
+  useEffect(() => {
+    if (!reduced && isDesktop) return
     const scroller = scrollerRef.current
     if (!scroller) return
     const cards = Array.from(
@@ -140,10 +204,18 @@ export function Services() {
     )
     cards.forEach((c) => io.observe(c))
     return () => io.disconnect()
-  }, [])
+  }, [reduced, isDesktop])
 
-  // Pagination -> Native horizontal scroll
+  // Pagination — bei aktivem Pin/Scrub Window scrollen, sonst native scroll
   const scrollToCard = (index: number) => {
+    if (!reduced && isDesktop && pinTriggerRef.current) {
+      const st = pinTriggerRef.current
+      const targetProgress =
+        SERVICES.length > 1 ? index / (SERVICES.length - 1) : 0
+      const targetScroll = st.start + (st.end - st.start) * targetProgress
+      window.scrollTo({ top: targetScroll, behavior: 'smooth' })
+      return
+    }
     const scroller = scrollerRef.current
     if (!scroller) return
     const card = scroller.querySelectorAll<HTMLElement>('[data-service-card]')[
@@ -159,7 +231,10 @@ export function Services() {
       id="leistungen"
       className="relative w-full overflow-hidden flex flex-col"
       style={{
-        minHeight: '100dvh',
+        // Desktop: feste 100dvh fuer Pin. Mobile/Tablet: minHeight 100dvh
+        // damit Section nicht durch grosse Karten ueberlaeuft, aber wachsen darf.
+        height: isDesktop ? '100dvh' : 'auto',
+        minHeight: isDesktop ? '640px' : '100dvh',
         backgroundColor: '#0e0d0a',
         color: '#f5f2eb',
       }}
@@ -265,28 +340,31 @@ export function Services() {
           </h2>
         </div>
 
-        {/* CAROUSEL — native horizontal scroll mit Snap. Funktioniert auf Touch + Maus. */}
-        <div className="flex-1 flex items-center mt-6 lg:mt-8" style={{ minHeight: 0 }}>
+        {/* CAROUSEL — native horizontal scroll mit Snap. Funktioniert auf Touch + Maus.
+            Wrapper ist position:relative + flex-1; Scroller fuellt via absolute inset-0,
+            damit percent-height-in-flex-item-Problem umgangen wird. */}
+        <div className="flex-1 relative mt-6 lg:mt-8" style={{ minHeight: 0 }}>
           <div
             ref={scrollerRef}
-            className="w-full h-full"
+            className="absolute inset-0"
             style={{
-              overflowX: 'auto',
+              // Native Horizontal-Scroll wenn kein Pin (Mobile/Tablet oder reduced)
+              overflowX: !isDesktop || reduced ? 'auto' : 'hidden',
               overflowY: 'hidden',
               WebkitOverflowScrolling: 'touch',
-              scrollSnapType: 'x mandatory',
+              scrollSnapType: !isDesktop || reduced ? 'x mandatory' : 'none',
               scrollPaddingLeft:
-                'max(24px, calc((100vw - var(--container-max)) / 2 + 24px))',
+                'max(16px, calc((100vw - var(--container-max)) / 2 + 24px))',
             }}
           >
             <div
               ref={trackRef}
-              className="flex gap-4 lg:gap-5 h-full"
+              className={`flex gap-3 lg:gap-5 ${isDesktop ? 'h-full items-stretch' : 'h-full items-center'}`}
               style={{
                 paddingLeft:
-                  'max(24px, calc((100vw - var(--container-max)) / 2 + 24px))',
+                  'max(16px, calc((100vw - var(--container-max)) / 2 + 24px))',
                 paddingRight:
-                  'max(24px, calc((100vw - var(--container-max)) / 2 + 24px))',
+                  'max(16px, calc((100vw - var(--container-max)) / 2 + 24px))',
                 width: 'max-content',
               }}
             >
@@ -295,6 +373,7 @@ export function Services() {
                   key={service.slug}
                   service={service}
                   isActive={active === i}
+                  isDesktop={isDesktop}
                 />
               ))}
             </div>
@@ -359,9 +438,11 @@ export function Services() {
 function ServiceCard({
   service,
   isActive,
+  isDesktop,
 }: {
   service: Service
   isActive: boolean
+  isDesktop: boolean
 }) {
   const [photoFailed, setPhotoFailed] = useState(false)
   const fallbackSrc = `https://picsum.photos/seed/klarwerk-${service.slug}/1200/1600`
@@ -372,8 +453,16 @@ function ServiceCard({
       className="relative overflow-hidden flex-shrink-0"
       style={{
         scrollSnapAlign: 'start',
-        height: '100%',
-        aspectRatio: '3 / 4',
+        // Desktop: hoehengetrieben (fuellt Carousel-Hoehe, 3:4 Portrait).
+        // Mobile/Tablet: breitengetrieben — eine Card passt nahezu komplett
+        // ins Viewport, Hoehe ergibt sich aus 3:4-Aspect.
+        ...(isDesktop
+          ? { height: '100%', aspectRatio: '3 / 4' }
+          : {
+              width: 'min(86vw, 380px)',
+              aspectRatio: '3 / 4',
+              maxHeight: 'calc(100dvh - 220px)',
+            }),
         borderRadius: '4px',
         border: '1px solid rgba(245,242,235,0.14)',
         boxShadow:
