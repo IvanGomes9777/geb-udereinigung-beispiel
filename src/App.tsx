@@ -1,58 +1,41 @@
+import { Header } from './components/Header'
+import { Hero } from './sections/Hero'
+import { useSmoothScroll } from './hooks/useSmoothScroll'
+
 export default function App() {
+  useSmoothScroll()
+
   return (
-    <main className="min-h-dvh flex items-center justify-center px-6">
-      <div className="max-w-xl text-center">
-        <p
-          className="text-[11px] uppercase"
+    <>
+      <Header />
+      <main>
+        <Hero />
+        {/* Placeholder area to allow scroll past hero */}
+        <section
+          aria-hidden
           style={{
-            fontFamily: 'var(--font-mono)',
-            letterSpacing: '0.18em',
-            color: 'var(--color-ink-secondary)',
+            minHeight: '40vh',
+            background: 'var(--color-bg-base)',
+            borderTop: '1px solid var(--color-line)',
+            display: 'grid',
+            placeItems: 'center',
+            padding: '4rem 1.5rem',
           }}
         >
-          KLARWERK · MÜNSTER · ANNO 2019
-        </p>
-
-        <h1
-          className="mt-8 leading-[0.92]"
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(48px, 10vw, 96px)',
-            letterSpacing: '-0.04em',
-            color: 'var(--color-ink-primary)',
-            fontWeight: 400,
-          }}
-        >
-          Projekt-Setup bereit.
-        </h1>
-
-        <p
-          className="mt-6 text-base sm:text-lg"
-          style={{ color: 'var(--color-ink-secondary)' }}
-        >
-          Vite + React 19 + Tailwind v4 + GSAP + Lenis + Framer Motion installiert.
-          Warte auf Freigabe der Hero-Spec, dann startet Section 1.
-        </p>
-
-        <div
-          className="mt-10 inline-flex items-center gap-2 px-4 py-2 rounded-full"
-          style={{
-            background: 'var(--color-glass-tint)',
-            border: '1px solid var(--color-glass-border)',
-            fontFamily: 'var(--font-mono)',
-            fontSize: '11px',
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            color: 'var(--color-ink-secondary)',
-          }}
-        >
-          <span
-            className="inline-block w-1.5 h-1.5 rounded-full"
-            style={{ background: 'var(--color-accent)' }}
-          />
-          Status: Ready for Hero
-        </div>
-      </div>
-    </main>
+          <p
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+              color: 'var(--color-ink-muted)',
+              textAlign: 'center',
+            }}
+          >
+            N° 02 — ÜBER UNS · in Vorbereitung · wartet auf Layout-Freigabe
+          </p>
+        </section>
+      </main>
+    </>
   )
 }
