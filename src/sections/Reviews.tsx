@@ -28,9 +28,9 @@ export function Reviews() {
 
   useEffect(() => {
     if (!sectionRef.current) return
-    const ctx = gsap.context(() => {
-      if (reduced) return
+    if (reduced) return
 
+    const ctx = gsap.context(() => {
       // 1) Card-Emerges Scrub
       gsap.fromTo(
         sectionRef.current,
@@ -47,103 +47,111 @@ export function Reviews() {
         }
       )
 
-      // 2) Head reveal (Eyebrow + Title)
+      // 2) Head — fromTo statt from, immediateRender:false damit Content
+      //    bei initialem Mount sichtbar bleibt falls Trigger nicht feuert.
       const headEls = headRef.current?.children
-      if (headEls) {
-        gsap.from(headEls, {
-          y: 36,
-          opacity: 0,
-          duration: 1.4,
-          stagger: 0.18,
-          ease: 'expo.out',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 78%',
-            once: true,
-          },
-        })
+      if (headEls && headEls.length > 0) {
+        gsap.fromTo(
+          headEls,
+          { y: 36, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1.2,
+            stagger: 0.15,
+            ease: 'expo.out',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 92%',
+              once: true,
+            },
+          }
+        )
       }
 
-      // 3) Big quote mark scales in with elastic-back bounce
+      // 3) Big quote mark — scale-bounce, immediateRender:false
       if (quoteMarkRef.current) {
-        gsap.from(quoteMarkRef.current, {
-          scale: 0,
-          rotation: -8,
-          opacity: 0,
-          duration: 1.6,
-          ease: 'back.out(1.6)',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 60%',
-            once: true,
-          },
-        })
+        gsap.fromTo(
+          quoteMarkRef.current,
+          { scale: 0, rotation: -8, opacity: 0 },
+          {
+            scale: 1,
+            rotation: 0,
+            opacity: 1,
+            duration: 1.4,
+            ease: 'back.out(1.5)',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 80%',
+              once: true,
+            },
+          }
+        )
       }
 
-      // 4) Pull-Quote — wort-fuer-wort reveal (Lese-Tempo)
-      if (quoteRef.current && quoteRef.current.textContent) {
-        const words = quoteRef.current.textContent.split(' ')
-        quoteRef.current.textContent = ''
-        words.forEach((w, i) => {
-          const span = document.createElement('span')
-          span.textContent = (i === 0 ? '' : ' ') + w
-          span.style.opacity = '0'
-          span.style.display = 'inline-block'
-          span.style.transform = 'translateY(0.4em)'
-          quoteRef.current!.appendChild(span)
-        })
-        gsap.to(quoteRef.current.children, {
-          opacity: 1,
-          y: 0,
-          duration: 1.1,
-          ease: 'expo.out',
-          stagger: 0.13,
-          delay: 0.6,
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 60%',
-            once: true,
-          },
-        })
+      // 4) Pull-Quote — simple slide-up (KEINE Text-Clearing-Logik mehr).
+      //    Text bleibt sichtbar; nur ein subtiler Slide-In als Enhancement.
+      if (quoteRef.current) {
+        gsap.fromTo(
+          quoteRef.current,
+          { y: 24, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1.2,
+            ease: 'expo.out',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 75%',
+              once: true,
+            },
+          }
+        )
       }
 
-      // 5) Attribution — Typewriter
-      if (attributionRef.current && attributionRef.current.textContent) {
-        const fullText = attributionRef.current.textContent
-        attributionRef.current.textContent = ''
-        const proxy = { i: 0 }
-        gsap.to(proxy, {
-          i: fullText.length,
-          duration: 1.8,
-          ease: 'power1.out',
-          delay: 2.2,
-          onUpdate: () => {
-            const len = Math.floor(proxy.i)
-            attributionRef.current!.textContent = fullText.slice(0, len)
-          },
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 60%',
-            once: true,
-          },
-        })
+      // 5) Attribution — simple fade
+      if (attributionRef.current) {
+        gsap.fromTo(
+          attributionRef.current,
+          { y: 12, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1.0,
+            delay: 0.3,
+            ease: 'expo.out',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 75%',
+              once: true,
+            },
+          }
+        )
       }
 
-      // 6) Bottom Trust-Strip slides up
+      // 6) Trust-Strip slides up
       if (stripRef.current) {
-        gsap.from(stripRef.current.children, {
-          y: 24,
-          opacity: 0,
-          duration: 1.0,
-          stagger: 0.1,
-          ease: 'expo.out',
-          delay: 2.8,
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 60%',
-            once: true,
-          },
-        })
+        gsap.fromTo(
+          stripRef.current.children,
+          { y: 24, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1.0,
+            stagger: 0.1,
+            ease: 'expo.out',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 65%',
+              once: true,
+            },
+          }
+        )
       }
 
       // 7) Counter animation
@@ -154,15 +162,14 @@ export function Reviews() {
         const proxy = { v: 0 }
         gsap.to(proxy, {
           v: target,
-          duration: 2.4,
+          duration: 2.0,
           ease: 'expo.out',
-          delay: 2.6,
           onUpdate: () => {
             el.textContent = proxy.v.toFixed(decimals).replace('.', ',')
           },
           scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 60%',
+            trigger: el,
+            start: 'top 95%',
             once: true,
           },
         })
@@ -188,7 +195,6 @@ export function Reviews() {
         boxShadow: '0 -20px 50px -28px rgba(0,0,0,0.45)',
       }}
     >
-      {/* Atmosphaeren-Orbs */}
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none"
@@ -197,7 +203,6 @@ export function Reviews() {
             'radial-gradient(ellipse at 90% 10%, rgba(255,87,34,0.07) 0%, transparent 55%), radial-gradient(ellipse at 10% 90%, rgba(110,180,210,0.06) 0%, transparent 60%)',
         }}
       />
-      {/* 12-col Editorial-Linien */}
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none opacity-[0.05]"
@@ -337,7 +342,6 @@ export function Reviews() {
                   textTransform: 'uppercase',
                   color: 'var(--color-ink-secondary)',
                   margin: 0,
-                  minHeight: '1.6em',
                 }}
               >
                 — {FEATURED.author} · {FEATURED.context}
@@ -346,13 +350,13 @@ export function Reviews() {
           </div>
         </div>
 
-        {/* TRUST STRIP — Aggregat + Mini-Reviews + Link */}
+        {/* TRUST STRIP */}
         <div
           ref={stripRef}
           className="mt-6 lg:mt-8 pt-5 grid grid-cols-1 md:grid-cols-12 gap-4 lg:gap-6 items-start"
           style={{ borderTop: '1px solid rgba(14,14,14,0.14)' }}
         >
-          {/* Aggregat (col 1-3) */}
+          {/* Aggregat */}
           <div className="md:col-span-3">
             <p
               style={{
@@ -398,7 +402,7 @@ export function Reviews() {
             </p>
           </div>
 
-          {/* Mini Reviews (col 4-9) */}
+          {/* Mini Reviews */}
           <div className="md:col-span-6 flex flex-col gap-2.5">
             <p
               style={{
@@ -412,13 +416,7 @@ export function Reviews() {
             >
               Weitere Stimmen
             </p>
-            <ul
-              style={{
-                listStyle: 'none',
-                margin: 0,
-                padding: 0,
-              }}
-            >
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
               {MINI_REVIEWS.map((r, i) => (
                 <li
                   key={i}
@@ -432,7 +430,9 @@ export function Reviews() {
                     paddingTop: i === 0 ? '4px' : '8px',
                   }}
                 >
-                  <span style={{ color: 'var(--color-accent)', fontSize: '11px' }}>
+                  <span
+                    style={{ color: 'var(--color-accent)', fontSize: '11px' }}
+                  >
                     ★
                   </span>
                   <span
@@ -466,7 +466,7 @@ export function Reviews() {
             </ul>
           </div>
 
-          {/* Alle Bewertungen Link (col 10-12) */}
+          {/* CTA */}
           <div className="md:col-span-3 flex flex-col justify-between items-start md:items-end gap-3 h-full">
             <p
               style={{
