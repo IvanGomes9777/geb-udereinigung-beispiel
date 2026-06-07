@@ -9,9 +9,8 @@ const VALUES = [
   {
     key: 'discretion',
     label: 'Diskretion',
-    desc: 'Schlüssel-übergaben, eigene Mitarbeiter, NDAs.',
     icon: (
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
         <path d="M12 3l8 4v6c0 4.5-3.5 8-8 8s-8-3.5-8-8V7l8-4z" stroke="currentColor" strokeWidth="1.2" />
         <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
@@ -20,9 +19,8 @@ const VALUES = [
   {
     key: 'thoroughness',
     label: 'Gründlichkeit',
-    desc: 'Checklisten, doppelte Sichtkontrolle, Fotodokumentation.',
     icon: (
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
         <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" strokeWidth="1.2" />
         <path d="M8 10l3 3 5-6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
@@ -31,9 +29,8 @@ const VALUES = [
   {
     key: 'punctuality',
     label: 'Pünktlichkeit',
-    desc: 'Fixe Zeitfenster, keine Verschiebungen ohne Rücksprache.',
     icon: (
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
         <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.2" />
         <path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
       </svg>
@@ -41,10 +38,9 @@ const VALUES = [
   },
   {
     key: 'local',
-    label: 'Lokal',
-    desc: 'Münster und 30 km Umkreis. Kurze Wege, klare Verantwortung.',
+    label: 'Lokal · Münster',
     icon: (
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
         <path d="M12 22s-7-7.5-7-13a7 7 0 0114 0c0 5.5-7 13-7 13z" stroke="currentColor" strokeWidth="1.2" />
         <circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.2" />
       </svg>
@@ -52,61 +48,89 @@ const VALUES = [
   },
 ] as const
 
-const CERTS = [
-  { label: 'DIN ISO 9001', note: 'Qualitätsmanagement' },
-  { label: 'TÜV-geprüfte Reinigungsmittel', note: 'Ökologisch unbedenklich' },
-  { label: 'BGN-versichert', note: 'Berufsgenossenschaft Nahrung & Gastgewerbe' },
-  { label: 'HWK Münster', note: 'Eingetragen, Inhaber Reinigungstechnik' },
-  { label: 'EU-DSGVO', note: 'Datenschutzkonform · Schlüsselverwaltung' },
+const TRUST_STRIP = [
+  'DIN ISO 9001',
+  'TÜV-geprüfte Reinigungsmittel',
+  'BGN-versichert',
+  'HWK Münster',
+  'EU-DSGVO',
 ]
 
 export function AboutUs() {
   const sectionRef = useRef<HTMLElement>(null)
+  const headRef = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotion()
 
   useEffect(() => {
     if (!sectionRef.current) return
     const ctx = gsap.context(() => {
-      const cards = gsap.utils.toArray<HTMLElement>('[data-bento-card]')
+      if (reduced) return
 
-      // Eintritts-Direktion pro Karte (Magic-Mosaik)
-      const directions = [
-        { x: -40, y: 0 },
-        { x: 0, y: -40 },
-        { x: 0, y: 40 },
-        { x: -40, y: 40 },
-        { x: 0, y: 40 },
-        { x: 40, y: 40 },
-      ]
+      // 1) SECTION SCRUB — Section "rises" from below as it enters viewport
+      //    (während Hero parallax-out scrolt, hebt sich About sanft hoch)
+      gsap.fromTo(
+        sectionRef.current,
+        { yPercent: 6 },
+        {
+          yPercent: 0,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top bottom',
+            end: 'top top',
+            scrub: 0.8,
+          },
+        }
+      )
 
-      if (reduced) {
-        gsap.set(cards, { opacity: 1, x: 0, y: 0 })
-        return
+      // 2) HEAD reveal — Eyebrow + Title staggern beim Eintritt von unten rein
+      const headElements = headRef.current?.children
+      if (headElements) {
+        gsap.from(headElements, {
+          y: 28,
+          opacity: 0,
+          duration: 0.85,
+          stagger: 0.08,
+          ease: 'expo.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 70%',
+            once: true,
+          },
+        })
       }
 
+      // 3) BENTO Cards Magic-Mosaik
+      const cards = gsap.utils.toArray<HTMLElement>('[data-bento-card]')
+      const dirs = [
+        { x: -32, y: 0 },
+        { x: 0, y: -28 },
+        { x: 0, y: 28 },
+        { x: 32, y: 0 },
+      ]
       cards.forEach((card, i) => {
-        const dir = directions[i % directions.length]
+        const d = dirs[i % dirs.length]
         gsap.from(card, {
-          x: dir.x,
-          y: dir.y,
+          x: d.x,
+          y: d.y,
           opacity: 0,
           duration: 0.9,
+          delay: i * 0.05,
           ease: 'expo.out',
-          delay: i * 0.06,
           scrollTrigger: {
-            trigger: card,
-            start: 'top 88%',
+            trigger: sectionRef.current,
+            start: 'top 60%',
             once: true,
           },
         })
       })
 
-      // SplitText-like word-stagger fuer die grosse Pull-Quote
+      // 4) Pull-Quote Wort-Stagger
       const quote = sectionRef.current?.querySelector<HTMLElement>(
         '[data-mission-quote]'
       )
-      if (quote) {
-        const words = quote.textContent?.split(' ') ?? []
+      if (quote && quote.textContent) {
+        const words = quote.textContent.split(' ')
         quote.textContent = ''
         words.forEach((w, i) => {
           const span = document.createElement('span')
@@ -119,18 +143,18 @@ export function AboutUs() {
         gsap.to(quote.children, {
           opacity: 1,
           y: 0,
-          duration: 0.7,
+          duration: 0.65,
           ease: 'expo.out',
-          stagger: 0.05,
+          stagger: 0.045,
           scrollTrigger: {
             trigger: quote,
-            start: 'top 80%',
+            start: 'top 85%',
             once: true,
           },
         })
       }
 
-      // Counter-Animation auf Zahlen
+      // 5) Counter-Animation auf Stats
       const counters = gsap.utils.toArray<HTMLElement>('[data-counter]')
       counters.forEach((el) => {
         const target = parseFloat(el.dataset.counter || '0')
@@ -141,13 +165,11 @@ export function AboutUs() {
           duration: 1.6,
           ease: 'expo.out',
           onUpdate: () => {
-            el.textContent = proxy.v
-              .toFixed(decimals)
-              .replace('.', ',')
+            el.textContent = proxy.v.toFixed(decimals).replace('.', ',')
           },
           scrollTrigger: {
             trigger: el,
-            start: 'top 85%',
+            start: 'top 90%',
             once: true,
           },
         })
@@ -160,14 +182,20 @@ export function AboutUs() {
     <section
       ref={sectionRef}
       id="ueber-uns"
-      className="relative w-full overflow-hidden"
+      className="relative w-full overflow-hidden flex flex-col"
       style={{
+        height: '100dvh',
+        minHeight: '640px',
         backgroundColor: '#e9e4d6',
-        paddingTop: 'clamp(80px, 10vh, 128px)',
-        paddingBottom: 'clamp(80px, 10vh, 128px)',
+        // "Card emerges" — About hebt sich aus der Hero hervor
+        borderTopLeftRadius: '32px',
+        borderTopRightRadius: '32px',
+        marginTop: '-32px',
+        zIndex: 5,
+        boxShadow: '0 -20px 50px -28px rgba(0,0,0,0.35)',
       }}
     >
-      {/* Subtile Architektur-Atmosphäre */}
+      {/* Subtile Atmosphaeren-Orbs */}
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none"
@@ -176,7 +204,7 @@ export function AboutUs() {
             'radial-gradient(ellipse at 80% 0%, rgba(255,87,34,0.06) 0%, transparent 55%), radial-gradient(ellipse at 0% 100%, rgba(70,55,30,0.05) 0%, transparent 60%)',
         }}
       />
-      {/* feine 12-col Linien */}
+      {/* Editorial 12-col Linien */}
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none opacity-[0.05]"
@@ -187,556 +215,375 @@ export function AboutUs() {
         }}
       />
 
+      {/* CONTENT WRAPPER — flex column 3 Zonen */}
       <div
-        className="relative mx-auto px-6 lg:px-10"
-        style={{ maxWidth: 'var(--container-max)' }}
+        className="relative flex-1 flex flex-col mx-auto w-full px-6 lg:px-10"
+        style={{
+          maxWidth: 'var(--container-max)',
+          zIndex: 2,
+          paddingTop: 'clamp(56px, 7vh, 80px)',
+          paddingBottom: 'clamp(48px, 6vh, 64px)',
+        }}
       >
-        {/* Section-Eyebrow */}
-        <div className="flex items-baseline justify-between flex-wrap gap-4 mb-10 lg:mb-14">
-          <p
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '11px',
-              letterSpacing: '0.22em',
-              textTransform: 'uppercase',
-              color: 'var(--color-ink-secondary)',
-              margin: 0,
-            }}
-          >
-            N° 02 — ÜBER UNS · INHABER · WERTE · STANDORT
-          </p>
-          <p
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '11px',
-              letterSpacing: '0.22em',
-              textTransform: 'uppercase',
-              color: 'var(--color-ink-muted)',
-              margin: 0,
-            }}
-          >
-            KLARWERK · GEBÄUDEREINIGUNG · MÜNSTER
-          </p>
-        </div>
-
-        {/* Section-Title */}
-        <h2
-          className="m-0 mb-12 lg:mb-16"
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(40px, 6vw, 96px)',
-            lineHeight: 0.95,
-            letterSpacing: '-0.04em',
-            fontVariationSettings: '"opsz" 144, "SOFT" 50, "WONK" 1',
-            color: 'var(--color-ink-primary)',
-            fontWeight: 400,
-            maxWidth: '14ch',
-          }}
-        >
-          Ein Betrieb.
-          <span
-            style={{
-              fontStyle: 'italic',
-              fontWeight: 300,
-              color: 'var(--color-ink-secondary)',
-              fontVariationSettings: '"opsz" 144, "SOFT" 100, "WONK" 1',
-              display: 'block',
-            }}
-          >
-            ein Versprechen.
-          </span>
-        </h2>
-
-        {/* Bento-Grid */}
-        <div
-          className="grid grid-cols-1 md:grid-cols-12 gap-4 lg:gap-5"
-          style={{ gridAutoRows: 'auto' }}
-        >
-          {/* ---------- CARD 1 — INHABER-PORTRAIT (col 1-7, row 1-3) ---------- */}
-          <div
-            data-bento-card
-            className="md:col-span-7 md:row-span-2 relative overflow-hidden"
-            style={{
-              borderRadius: '4px',
-              background: 'rgba(255,255,255,0.45)',
-              backdropFilter: 'blur(18px) saturate(160%)',
-              WebkitBackdropFilter: 'blur(18px) saturate(160%)',
-              border: '1px solid rgba(255,255,255,0.6)',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.8), 0 24px 50px -28px rgba(14,14,14,0.18)',
-              padding: '24px',
-              minHeight: '460px',
-            }}
-          >
+        {/* ZONE 1 — HEAD: Eyebrow + kompakter Title */}
+        <div ref={headRef}>
+          <div className="flex items-baseline justify-between flex-wrap gap-3 mb-4 lg:mb-6">
             <p
               style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
+                fontSize: '11px',
                 letterSpacing: '0.22em',
                 textTransform: 'uppercase',
                 color: 'var(--color-ink-secondary)',
                 margin: 0,
               }}
             >
-              N° 01 — INHABER
+              N° 02 — ÜBER UNS · INHABER · WERTE
             </p>
-
-            <div
-              className="mt-4 relative overflow-hidden"
+            <p
               style={{
-                aspectRatio: '4 / 5',
-                borderRadius: '2px',
-                background: '#d8d3c4',
-                border: '1px solid rgba(255,255,255,0.7)',
-                boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 24px -12px rgba(14,14,14,0.25)',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '11px',
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+                color: 'var(--color-ink-muted)',
+                margin: 0,
               }}
             >
-              {/* Portrait wird hier eingehängt sobald Higgsfield-Job fertig ist */}
-              <img
-                src="/images/inhaber-portrait.jpg"
-                alt="[Inhaber-Vorname] [Inhaber-Nachname], Gründer und Inhaber von KLARWERK"
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ filter: 'contrast(1.02) saturate(0.95)' }}
-                onError={(e) => {
-                  // Fallback: zeige Placeholder-Look bis das Bild da ist
-                  ;(e.currentTarget as HTMLImageElement).style.display = 'none'
-                }}
-              />
-              {/* Placeholder-Layer falls Bild noch nicht da */}
-              <div
-                aria-hidden
-                className="absolute inset-0 flex items-center justify-center"
-                style={{
-                  background:
-                    'linear-gradient(180deg, rgba(229,224,210,0.95) 0%, rgba(216,211,196,0.95) 100%)',
-                  zIndex: -1,
-                }}
-              >
-                <span
+              KLARWERK · MÜNSTER
+            </p>
+          </div>
+
+          <h2
+            className="m-0"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(36px, 5.4vw, 80px)',
+              lineHeight: 0.95,
+              letterSpacing: '-0.04em',
+              fontVariationSettings: '"opsz" 144, "SOFT" 50, "WONK" 1',
+              color: 'var(--color-ink-primary)',
+              fontWeight: 400,
+              display: 'flex',
+              flexWrap: 'wrap',
+              columnGap: '0.4em',
+              alignItems: 'baseline',
+            }}
+          >
+            <span>Ein Betrieb,</span>
+            <span
+              style={{
+                fontStyle: 'italic',
+                fontWeight: 300,
+                color: 'var(--color-ink-secondary)',
+                fontVariationSettings: '"opsz" 144, "SOFT" 100, "WONK" 1',
+              }}
+            >
+              ein Versprechen.
+            </span>
+          </h2>
+        </div>
+
+        {/* ZONE 2 — BENTO 4-Karten-Grid, faellt mittig vertikal */}
+        <div className="flex-1 flex items-center mt-6 lg:mt-8">
+          <div
+            className="grid grid-cols-1 md:grid-cols-12 gap-3 lg:gap-4 w-full"
+            style={{ minHeight: 0 }}
+          >
+            {/* CARD 1 — INHABER PORTRAIT (col 1-5, beide Rows) */}
+            <div
+              data-bento-card
+              className="md:col-span-5 md:row-span-2 relative overflow-hidden flex flex-col"
+              style={{
+                borderRadius: '4px',
+                background: 'rgba(255,255,255,0.5)',
+                backdropFilter: 'blur(18px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(18px) saturate(160%)',
+                border: '1px solid rgba(255,255,255,0.65)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.85), 0 24px 50px -28px rgba(14,14,14,0.18)',
+                padding: '16px',
+                minHeight: 0,
+              }}
+            >
+              <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
+                <p
                   style={{
                     fontFamily: 'var(--font-mono)',
                     fontSize: '10px',
                     letterSpacing: '0.22em',
                     textTransform: 'uppercase',
-                    color: 'var(--color-ink-muted)',
+                    color: 'var(--color-ink-secondary)',
+                    margin: 0,
                   }}
                 >
-                  [INHABER-PORTRAIT]
-                </span>
+                  N° 01 — Inhaber
+                </p>
+                <p
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '10px',
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-ink-muted)',
+                    margin: 0,
+                  }}
+                >
+                  Seit <span data-counter="2019">2019</span>
+                </p>
+              </div>
+
+              <div
+                className="relative overflow-hidden flex-1"
+                style={{
+                  borderRadius: '2px',
+                  background: '#d8d3c4',
+                  border: '1px solid rgba(255,255,255,0.7)',
+                  boxShadow:
+                    'inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 24px -12px rgba(14,14,14,0.25)',
+                  minHeight: 0,
+                }}
+              >
+                <img
+                  src="/images/inhaber-portrait.jpg"
+                  alt="[Inhaber-Vorname] [Inhaber-Nachname], Gründer und Inhaber von KLARWERK"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{ filter: 'contrast(1.02) saturate(0.95)' }}
+                />
+              </div>
+
+              <div className="mt-3 flex items-baseline justify-between flex-wrap gap-2">
+                <p
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 'clamp(18px, 1.6vw, 22px)',
+                    letterSpacing: '-0.02em',
+                    color: 'var(--color-ink-primary)',
+                    margin: 0,
+                    fontWeight: 500,
+                    fontVariationSettings: '"opsz" 36, "SOFT" 50',
+                  }}
+                >
+                  [Vorname Nachname]
+                </p>
+                <p
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '10px',
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-ink-secondary)',
+                    margin: 0,
+                  }}
+                >
+                  Gründer · Inhaber
+                </p>
               </div>
             </div>
 
-            <div className="mt-5 flex items-baseline justify-between flex-wrap gap-2">
-              <p
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '24px',
-                  letterSpacing: '-0.02em',
-                  color: 'var(--color-ink-primary)',
-                  margin: 0,
-                  fontWeight: 500,
-                  fontVariationSettings: '"opsz" 36, "SOFT" 50',
-                }}
-              >
-                [Vorname Nachname]
-              </p>
+            {/* CARD 2 — LEITSATZ QUOTE (col 6-9, row 1) */}
+            <div
+              data-bento-card
+              className="md:col-span-4"
+              style={{
+                borderRadius: '4px',
+                background:
+                  'linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.25) 100%)',
+                backdropFilter: 'blur(18px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(18px) saturate(160%)',
+                border: '1px solid rgba(255,255,255,0.65)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.85), 0 24px 50px -28px rgba(14,14,14,0.18)',
+                padding: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                minHeight: 0,
+              }}
+            >
               <p
                 style={{
                   fontFamily: 'var(--font-mono)',
-                  fontSize: '11px',
-                  letterSpacing: '0.18em',
+                  fontSize: '10px',
+                  letterSpacing: '0.22em',
                   textTransform: 'uppercase',
                   color: 'var(--color-ink-secondary)',
                   margin: 0,
                 }}
               >
-                Gründer · Inhaber
+                Leitsatz
               </p>
-            </div>
 
-            <p
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '15px',
-                lineHeight: 1.55,
-                color: 'var(--color-ink-secondary)',
-                marginTop: '12px',
-                margin: '12px 0 0 0',
-              }}
-            >
-              Aufgewachsen in [Stadt], gelernter [Beruf], seit{' '}
-              <span data-counter="2019">2019</span> mit eigenem Betrieb in
-              Münster. Persönlich vor Ort bei jedem Erstbesuch und jeder Abnahme.
-            </p>
-          </div>
-
-          {/* ---------- CARD 2 — MISSION QUOTE (col 8-12, row 1) ---------- */}
-          <div
-            data-bento-card
-            className="md:col-span-5 relative"
-            style={{
-              borderRadius: '4px',
-              background:
-                'linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.25) 100%)',
-              backdropFilter: 'blur(18px) saturate(160%)',
-              WebkitBackdropFilter: 'blur(18px) saturate(160%)',
-              border: '1px solid rgba(255,255,255,0.6)',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.8), 0 24px 50px -28px rgba(14,14,14,0.18)',
-              padding: '28px',
-              minHeight: '220px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-            }}
-          >
-            <p
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                letterSpacing: '0.22em',
-                textTransform: 'uppercase',
-                color: 'var(--color-ink-secondary)',
-                margin: 0,
-              }}
-            >
-              Leitsatz seit 2019
-            </p>
-
-            <blockquote
-              data-mission-quote
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(24px, 2.4vw, 36px)',
-                lineHeight: 1.1,
-                letterSpacing: '-0.025em',
-                color: 'var(--color-ink-primary)',
-                fontStyle: 'italic',
-                fontWeight: 350,
-                fontVariationSettings: '"opsz" 144, "SOFT" 100, "WONK" 1',
-                margin: 0,
-              }}
-            >
-              Wir kommen wieder, wenn niemand hinsieht.
-            </blockquote>
-
-            <div
-              style={{
-                paddingTop: '14px',
-                borderTop: '1px solid rgba(14,14,14,0.1)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                letterSpacing: '0.18em',
-                textTransform: 'uppercase',
-                color: 'var(--color-ink-muted)',
-              }}
-            >
-              — [Inhabername] · Gründer
-            </div>
-          </div>
-
-          {/* ---------- CARD 3 — WERTE (col 8-12, row 2) ---------- */}
-          <div
-            data-bento-card
-            className="md:col-span-5"
-            style={{
-              borderRadius: '4px',
-              background: 'rgba(255,255,255,0.4)',
-              backdropFilter: 'blur(18px) saturate(160%)',
-              WebkitBackdropFilter: 'blur(18px) saturate(160%)',
-              border: '1px solid rgba(255,255,255,0.6)',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.8), 0 24px 50px -28px rgba(14,14,14,0.18)',
-              padding: '24px',
-              minHeight: '220px',
-            }}
-          >
-            <p
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                letterSpacing: '0.22em',
-                textTransform: 'uppercase',
-                color: 'var(--color-ink-secondary)',
-                margin: '0 0 16px 0',
-              }}
-            >
-              Werte
-            </p>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-5">
-              {VALUES.map((v) => (
-                <div key={v.key}>
-                  <div
-                    style={{
-                      color: 'var(--color-ink-primary)',
-                      marginBottom: '8px',
-                    }}
-                  >
-                    {v.icon}
-                  </div>
-                  <p
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: '18px',
-                      letterSpacing: '-0.015em',
-                      color: 'var(--color-ink-primary)',
-                      margin: '0 0 4px 0',
-                      fontWeight: 500,
-                      fontVariationSettings: '"opsz" 36',
-                    }}
-                  >
-                    {v.label}
-                  </p>
-                  <p
-                    style={{
-                      fontFamily: 'var(--font-body)',
-                      fontSize: '12.5px',
-                      lineHeight: 1.45,
-                      color: 'var(--color-ink-secondary)',
-                      margin: 0,
-                    }}
-                  >
-                    {v.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ---------- CARD 4 — STANDORT KARTE (col 1-4) ---------- */}
-          <div
-            data-bento-card
-            className="md:col-span-4 relative"
-            style={{
-              borderRadius: '4px',
-              background: 'rgba(255,255,255,0.4)',
-              backdropFilter: 'blur(18px) saturate(160%)',
-              WebkitBackdropFilter: 'blur(18px) saturate(160%)',
-              border: '1px solid rgba(255,255,255,0.6)',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.8), 0 24px 50px -28px rgba(14,14,14,0.18)',
-              padding: '20px',
-              minHeight: '260px',
-              overflow: 'hidden',
-            }}
-          >
-            <p
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                letterSpacing: '0.22em',
-                textTransform: 'uppercase',
-                color: 'var(--color-ink-secondary)',
-                margin: '0 0 12px 0',
-              }}
-            >
-              Standort
-            </p>
-
-            {/* OpenStreetMap-Embed: echte Münster-Karte */}
-            <div
-              className="relative overflow-hidden"
-              style={{
-                aspectRatio: '4 / 3',
-                borderRadius: '2px',
-                border: '1px solid rgba(14,14,14,0.1)',
-              }}
-            >
-              <iframe
-                title="KLARWERK Standort Münster"
-                src="https://www.openstreetmap.org/export/embed.html?bbox=7.5800%2C51.9300%2C7.7000%2C51.9900&layer=mapnik&marker=51.9607%2C7.6261"
+              <blockquote
+                data-mission-quote
                 style={{
-                  border: 0,
-                  width: '100%',
-                  height: '100%',
-                  filter: 'grayscale(0.6) contrast(0.95) saturate(0.85)',
-                }}
-                loading="lazy"
-                aria-hidden
-              />
-              {/* Soft tint overlay zur Brand-Anpassung */}
-              <div
-                aria-hidden
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background:
-                    'linear-gradient(180deg, rgba(233,228,214,0.15) 0%, rgba(255,87,34,0.06) 100%)',
-                  mixBlendMode: 'multiply',
-                }}
-              />
-            </div>
-
-            <div className="mt-3 flex items-baseline justify-between flex-wrap gap-2">
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '11px',
-                  letterSpacing: '0.16em',
-                  textTransform: 'uppercase',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'clamp(18px, 1.85vw, 28px)',
+                  lineHeight: 1.12,
+                  letterSpacing: '-0.025em',
                   color: 'var(--color-ink-primary)',
+                  fontStyle: 'italic',
+                  fontWeight: 350,
+                  fontVariationSettings: '"opsz" 144, "SOFT" 100, "WONK" 1',
+                  margin: '12px 0',
                 }}
               >
-                Münster · Westfalen
-              </span>
-              <span
+                Wir kommen wieder, wenn niemand hinsieht.
+              </blockquote>
+
+              <div
                 style={{
                   fontFamily: 'var(--font-mono)',
                   fontSize: '10px',
-                  letterSpacing: '0.14em',
+                  letterSpacing: '0.18em',
                   textTransform: 'uppercase',
                   color: 'var(--color-ink-muted)',
+                  paddingTop: '8px',
+                  borderTop: '1px solid rgba(14,14,14,0.1)',
                 }}
               >
-                51°57′N · 7°37′E
-              </span>
+                — [Inhabername] · Gründer
+              </div>
             </div>
-            <p
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '12px',
-                lineHeight: 1.45,
-                color: 'var(--color-ink-secondary)',
-                marginTop: '6px',
-                margin: '6px 0 0 0',
-              }}
-            >
-              Einzugsgebiet: Münster + 30 km Umkreis (Telgte, Greven, Senden,
-              Havixbeck, Drensteinfurt).
-            </p>
-          </div>
 
-          {/* ---------- CARD 5 — ZERTIFIKATE (col 5-8) ---------- */}
-          <div
-            data-bento-card
-            className="md:col-span-4"
-            style={{
-              borderRadius: '4px',
-              background: 'rgba(255,255,255,0.4)',
-              backdropFilter: 'blur(18px) saturate(160%)',
-              WebkitBackdropFilter: 'blur(18px) saturate(160%)',
-              border: '1px solid rgba(255,255,255,0.6)',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.8), 0 24px 50px -28px rgba(14,14,14,0.18)',
-              padding: '24px',
-              minHeight: '260px',
-            }}
-          >
-            <p
+            {/* CARD 3 — KENNZAHLEN DARK (col 10-12, beide Rows) */}
+            <div
+              data-bento-card
+              className="md:col-span-3 md:row-span-2"
               style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                letterSpacing: '0.22em',
-                textTransform: 'uppercase',
-                color: 'var(--color-ink-secondary)',
-                margin: '0 0 14px 0',
-              }}
-            >
-              Nachweise · Mitgliedschaften
-            </p>
-            <ul
-              style={{
-                listStyle: 'none',
-                margin: 0,
-                padding: 0,
+                borderRadius: '4px',
+                background:
+                  'linear-gradient(140deg, var(--color-ink-primary) 0%, #1a1814 100%)',
+                border: '1px solid rgba(14,14,14,0.4)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.08), 0 24px 50px -28px rgba(14,14,14,0.35)',
+                padding: '20px',
+                color: '#f5f2eb',
                 display: 'flex',
                 flexDirection: 'column',
+                justifyContent: 'space-between',
+                minHeight: 0,
               }}
             >
-              {CERTS.map((cert, i) => (
-                <li
-                  key={cert.label}
-                  style={{
-                    paddingTop: i === 0 ? 0 : '10px',
-                    paddingBottom: '10px',
-                    borderBottom:
-                      i === CERTS.length - 1
-                        ? 'none'
-                        : '1px solid rgba(14,14,14,0.08)',
-                  }}
-                >
-                  <p
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '12px',
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                      color: 'var(--color-ink-primary)',
-                      margin: '0 0 2px 0',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {cert.label}
-                  </p>
-                  <p
-                    style={{
-                      fontFamily: 'var(--font-body)',
-                      fontSize: '12px',
-                      color: 'var(--color-ink-muted)',
-                      margin: 0,
-                    }}
-                  >
-                    {cert.note}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
+              <p
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '10px',
+                  letterSpacing: '0.22em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(245,242,235,0.55)',
+                  margin: 0,
+                }}
+              >
+                In Zahlen
+              </p>
 
-          {/* ---------- CARD 6 — KENNZAHLEN (col 9-12) ---------- */}
-          <div
-            data-bento-card
-            className="md:col-span-4"
-            style={{
-              borderRadius: '4px',
-              background:
-                'linear-gradient(135deg, var(--color-ink-primary) 0%, #1a1814 100%)',
-              border: '1px solid rgba(14,14,14,0.4)',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.08), 0 24px 50px -28px rgba(14,14,14,0.35)',
-              padding: '24px',
-              minHeight: '260px',
-              color: '#f5f2eb',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-            }}
-          >
-            <p
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                letterSpacing: '0.22em',
-                textTransform: 'uppercase',
-                color: 'rgba(245,242,235,0.55)',
-                margin: 0,
-              }}
-            >
-              In Zahlen
-            </p>
+              <div className="grid grid-cols-1 gap-3">
+                <Stat number="127" label="Objekte aktuell betreut" />
+                <Stat number="4,9" label="Sterne · 127 Reviews" accent />
+                <Stat number="14" label="eigene Mitarbeiter" />
+              </div>
 
-            <div className="grid grid-cols-2 gap-5 mt-4">
-              <Stat number="2019" suffix="" label="gegründet" />
-              <Stat number="127" suffix="" label="Objekte aktuell" />
-              <Stat number="4,9" suffix="" label="Sterne · 127 Reviews" accent />
-              <Stat number="14" suffix="" label="eigene Mitarbeiter" />
+              <p
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '9px',
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(245,242,235,0.4)',
+                  margin: 0,
+                  paddingTop: '12px',
+                  borderTop: '1px solid rgba(245,242,235,0.12)',
+                }}
+              >
+                Stand <span data-placeholder>Q2 / 2026</span>
+              </p>
             </div>
 
-            <p
+            {/* CARD 4 — WERTE (col 6-9, row 2) */}
+            <div
+              data-bento-card
+              className="md:col-span-4"
               style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-                color: 'rgba(245,242,235,0.4)',
-                margin: 0,
-                paddingTop: '14px',
-                borderTop: '1px solid rgba(245,242,235,0.12)',
+                borderRadius: '4px',
+                background: 'rgba(255,255,255,0.4)',
+                backdropFilter: 'blur(18px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(18px) saturate(160%)',
+                border: '1px solid rgba(255,255,255,0.65)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.85), 0 24px 50px -28px rgba(14,14,14,0.18)',
+                padding: '18px',
+                minHeight: 0,
               }}
             >
-              Stand: <span data-placeholder>Q2 / 2026</span>
-            </p>
+              <p
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '10px',
+                  letterSpacing: '0.22em',
+                  textTransform: 'uppercase',
+                  color: 'var(--color-ink-secondary)',
+                  margin: '0 0 12px 0',
+                }}
+              >
+                Werte
+              </p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                {VALUES.map((v) => (
+                  <div key={v.key} className="flex items-center gap-3">
+                    <div style={{ color: 'var(--color-ink-primary)' }}>
+                      {v.icon}
+                    </div>
+                    <p
+                      style={{
+                        fontFamily: 'var(--font-display)',
+                        fontSize: 'clamp(13px, 1.05vw, 16px)',
+                        letterSpacing: '-0.015em',
+                        color: 'var(--color-ink-primary)',
+                        margin: 0,
+                        fontWeight: 500,
+                        fontVariationSettings: '"opsz" 36',
+                        lineHeight: 1.1,
+                      }}
+                    >
+                      {v.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* ZONE 3 — TRUST STRIP (Certs als Mono-Inline) */}
+        <div
+          className="mt-6 lg:mt-8 pt-4 flex items-center justify-between gap-4 flex-wrap"
+          style={{
+            borderTop: '1px solid rgba(14,14,14,0.12)',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '10px',
+            letterSpacing: '0.16em',
+            textTransform: 'uppercase',
+            color: 'var(--color-ink-secondary)',
+          }}
+        >
+          <span style={{ color: 'var(--color-ink-muted)' }}>Nachweise</span>
+          <div className="flex items-center flex-wrap gap-x-3 gap-y-1">
+            {TRUST_STRIP.map((c, i) => (
+              <span key={c} className="inline-flex items-center gap-3">
+                {i > 0 && (
+                  <span style={{ color: 'var(--color-ink-muted)' }}>·</span>
+                )}
+                {c}
+              </span>
+            ))}
+          </div>
+          <span
+            style={{ color: 'var(--color-ink-muted)' }}
+            className="hidden md:inline"
+          >
+            51°57′N · 7°37′E
+          </span>
         </div>
       </div>
     </section>
@@ -745,12 +592,10 @@ export function AboutUs() {
 
 function Stat({
   number,
-  suffix,
   label,
   accent,
 }: {
   number: string
-  suffix?: string
   label: string
   accent?: boolean
 }) {
@@ -759,7 +604,7 @@ function Stat({
       <div
         style={{
           fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(40px, 4.5vw, 56px)',
+          fontSize: 'clamp(32px, 3.6vw, 48px)',
           lineHeight: 0.95,
           letterSpacing: '-0.04em',
           fontVariationSettings: '"opsz" 144, "SOFT" 50, "WONK" 1',
@@ -768,26 +613,15 @@ function Stat({
         }}
       >
         <span data-counter={number.replace(',', '.')}>{number}</span>
-        {suffix && (
-          <span
-            style={{
-              fontSize: '0.5em',
-              marginLeft: '0.1em',
-              color: 'rgba(245,242,235,0.55)',
-            }}
-          >
-            {suffix}
-          </span>
-        )}
       </div>
       <p
         style={{
           fontFamily: 'var(--font-mono)',
           fontSize: '10px',
-          letterSpacing: '0.16em',
+          letterSpacing: '0.14em',
           textTransform: 'uppercase',
           color: 'rgba(245,242,235,0.6)',
-          margin: '8px 0 0 0',
+          margin: '4px 0 0 0',
         }}
       >
         {label}
