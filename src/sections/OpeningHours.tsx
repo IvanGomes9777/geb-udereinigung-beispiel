@@ -181,7 +181,7 @@ export function OpeningHours() {
             className="m-0"
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(36px, 5.4vw, 80px)',
+              fontSize: 'clamp(36px, 5.4vw, 160px)',
               lineHeight: 0.95,
               letterSpacing: '-0.04em',
               fontVariationSettings: '"opsz" 144, "SOFT" 50, "WONK" 1',
@@ -280,7 +280,7 @@ export function OpeningHours() {
                       className="flex-1"
                       style={{
                         fontFamily: 'var(--font-display)',
-                        fontSize: 'clamp(20px, 2.4vw, 32px)',
+                        fontSize: 'clamp(20px, 2.4vw, 64px)',
                         letterSpacing: '-0.025em',
                         color: day.open ? '#f5f2eb' : 'rgba(245,242,235,0.4)',
                         fontWeight: isToday ? 500 : 350,
@@ -338,7 +338,7 @@ export function OpeningHours() {
               <h3
                 style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(22px, 2.4vw, 32px)',
+                  fontSize: 'clamp(22px, 2.4vw, 64px)',
                   lineHeight: 1.05,
                   letterSpacing: '-0.025em',
                   color: '#f5f2eb',

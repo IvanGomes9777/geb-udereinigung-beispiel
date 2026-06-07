@@ -24,7 +24,10 @@ export function Header() {
           backgroundColor: 'transparent',
         }}
       >
-        <div className="mx-auto max-w-[1440px] px-6 lg:px-10 h-16 lg:h-20 flex items-center justify-between">
+        <div
+          className="mx-auto px-6 lg:px-10 h-16 lg:h-20 flex items-center justify-between"
+          style={{ maxWidth: 'var(--container-max)' }}
+        >
           <a
             href="#hero"
             className="font-bold tracking-[0.04em] text-sm lg:text-base transition-colors duration-300"

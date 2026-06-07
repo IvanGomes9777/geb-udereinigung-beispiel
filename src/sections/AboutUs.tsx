@@ -254,7 +254,7 @@ export function AboutUs() {
             className="m-0"
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(36px, 5.4vw, 80px)',
+              fontSize: 'clamp(36px, 5.4vw, 160px)',
               lineHeight: 0.95,
               letterSpacing: '-0.04em',
               fontVariationSettings: '"opsz" 144, "SOFT" 50, "WONK" 1',
@@ -378,7 +378,7 @@ export function AboutUs() {
                 <p
                   style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: 'clamp(28px, 3.4vw, 52px)',
+                    fontSize: 'clamp(28px, 3.4vw, 104px)',
                     lineHeight: 1.05,
                     letterSpacing: '-0.03em',
                     color: '#f5f2eb',
@@ -444,7 +444,7 @@ export function AboutUs() {
                 data-mission-quote
                 style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(18px, 1.85vw, 28px)',
+                  fontSize: 'clamp(18px, 1.85vw, 56px)',
                   lineHeight: 1.12,
                   letterSpacing: '-0.025em',
                   color: 'var(--color-ink-primary)',
@@ -630,7 +630,7 @@ function Stat({
       <div
         style={{
           fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(32px, 3.6vw, 48px)',
+          fontSize: 'clamp(32px, 3.6vw, 96px)',
           lineHeight: 0.95,
           letterSpacing: '-0.04em',
           fontVariationSettings: '"opsz" 144, "SOFT" 50, "WONK" 1',

@@ -256,7 +256,7 @@ export function Reviews() {
             className="m-0"
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(36px, 5.4vw, 80px)',
+              fontSize: 'clamp(36px, 5.4vw, 160px)',
               lineHeight: 0.95,
               letterSpacing: '-0.04em',
               fontVariationSettings: '"opsz" 144, "SOFT" 50, "WONK" 1',
@@ -295,7 +295,7 @@ export function Reviews() {
                 aria-hidden
                 style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(140px, 18vw, 280px)',
+                  fontSize: 'clamp(140px, 18vw, 480px)',
                   lineHeight: 0.8,
                   letterSpacing: '-0.06em',
                   color: 'var(--color-accent)',
@@ -317,7 +317,7 @@ export function Reviews() {
                 ref={quoteRef}
                 style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(34px, 5.8vw, 96px)',
+                  fontSize: 'clamp(34px, 5.8vw, 180px)',
                   lineHeight: 1.04,
                   letterSpacing: '-0.035em',
                   color: 'var(--color-ink-primary)',
@@ -372,7 +372,7 @@ export function Reviews() {
               className="inline-flex items-baseline gap-2"
               style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(32px, 3vw, 44px)',
+                fontSize: 'clamp(32px, 3vw, 88px)',
                 lineHeight: 1,
                 letterSpacing: '-0.03em',
                 color: 'var(--color-ink-primary)',

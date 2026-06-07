@@ -119,7 +119,7 @@ export function Contact() {
             className="m-0 mb-10 lg:mb-14"
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(36px, 5.4vw, 80px)',
+              fontSize: 'clamp(36px, 5.4vw, 160px)',
               lineHeight: 0.95,
               letterSpacing: '-0.04em',
               fontVariationSettings: '"opsz" 144, "SOFT" 50, "WONK" 1',
@@ -177,7 +177,7 @@ export function Contact() {
                   <p
                     style={{
                       fontFamily: 'var(--font-display)',
-                      fontSize: 'clamp(22px, 2.4vw, 32px)',
+                      fontSize: 'clamp(22px, 2.4vw, 56px)',
                       lineHeight: 1.15,
                       letterSpacing: '-0.025em',
                       color: 'var(--color-ink-primary)',
@@ -544,7 +544,7 @@ function ContactLine({
     <span
       style={{
         fontFamily: 'var(--font-display)',
-        fontSize: 'clamp(16px, 1.4vw, 19px)',
+        fontSize: 'clamp(16px, 1.4vw, 28px)',
         letterSpacing: '-0.015em',
         color: 'var(--color-ink-primary)',
         fontWeight: 500,

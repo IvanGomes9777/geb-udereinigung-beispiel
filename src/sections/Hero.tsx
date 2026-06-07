@@ -184,7 +184,7 @@ export function Hero() {
               className="col-span-12 lg:col-span-7 m-0"
               style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(56px, 9vw, 144px)',
+                fontSize: 'clamp(56px, 9vw, 260px)',
                 lineHeight: 0.88,
                 letterSpacing: '-0.045em',
                 color: '#f5f2eb',
@@ -256,7 +256,7 @@ export function Hero() {
               <p
                 style={{
                   fontFamily: 'var(--font-body)',
-                  fontSize: 'clamp(15px, 1.05vw, 17px)',
+                  fontSize: 'clamp(15px, 1.05vw, 24px)',
                   lineHeight: 1.55,
                   color: 'rgba(245,242,235,0.92)',
                   margin: 0,
@@ -271,7 +271,7 @@ export function Hero() {
                     fontWeight: 500,
                     fontStyle: 'italic',
                     fontFamily: 'var(--font-display)',
-                    fontSize: 'clamp(16px, 1.15vw, 19px)',
+                    fontSize: 'clamp(16px, 1.15vw, 28px)',
                     fontVariationSettings: '"opsz" 36, "SOFT" 80',
                     letterSpacing: '-0.005em',
                   }}

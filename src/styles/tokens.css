@@ -22,7 +22,7 @@
 
   /* ---------- Spacing & Grid ---------- */
   --spacing-gutter: 24px;
-  --container-max: 1440px;
+  --container-max: 1840px;  /* hoch genug fuer 21:9 / 4K Ultra-Wide */
   --grid-cols: 12;
 
   /* ---------- Motion ---------- */

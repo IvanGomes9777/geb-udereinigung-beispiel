@@ -232,7 +232,7 @@ export function Services() {
             className="m-0"
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(36px, 5.4vw, 80px)',
+              fontSize: 'clamp(36px, 5.4vw, 160px)',
               lineHeight: 0.95,
               letterSpacing: '-0.04em',
               fontVariationSettings: '"opsz" 144, "SOFT" 50, "WONK" 1',

@@ -35,7 +35,7 @@ export function Footer() {
               className="m-0"
               style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(40px, 5vw, 88px)',
+                fontSize: 'clamp(40px, 5vw, 180px)',
                 lineHeight: 0.95,
                 letterSpacing: '-0.04em',
                 fontVariationSettings: '"opsz" 144, "SOFT" 50, "WONK" 1',
