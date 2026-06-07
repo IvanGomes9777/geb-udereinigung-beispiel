@@ -187,15 +187,8 @@ export function AboutUs() {
       id="ueber-uns"
       className="relative w-full overflow-hidden flex flex-col"
       style={{
-        height: '100dvh',
-        minHeight: '640px',
+        minHeight: '100dvh',
         backgroundColor: '#e9e4d6',
-        // "Card emerges" — About hebt sich aus der Hero hervor
-        borderTopLeftRadius: '32px',
-        borderTopRightRadius: '32px',
-        marginTop: '-32px',
-        zIndex: 5,
-        boxShadow: '0 -20px 50px -28px rgba(0,0,0,0.35)',
       }}
     >
       {/* Subtile Atmosphaeren-Orbs */}

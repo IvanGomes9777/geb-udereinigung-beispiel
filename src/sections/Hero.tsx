@@ -114,39 +114,8 @@ export function Hero() {
     return () => ctx.revert()
   }, [reduced])
 
-  // ---------- Scroll-driven cinematic parallax ----------
-  useEffect(() => {
-    if (reduced) return
-    const sectionEl = sectionRef.current
-    if (!sectionEl || !bgWrapRef.current || !innerRef.current) return
-
-    const ctx = gsap.context(() => {
-      gsap.to(bgWrapRef.current, {
-        yPercent: -12,
-        scale: 1.08,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 0.8,
-        },
-      })
-      gsap.to(innerRef.current, {
-        yPercent: -10,
-        opacity: 0.5,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 0.5,
-        },
-      })
-    }, sectionEl)
-
-    return () => ctx.revert()
-  }, [reduced])
+  // Scroll-Parallax deaktiviert — konnte in Kombination mit dvh-Layout
+  // Mess-Probleme verursachen. Hero scrolt normal aus dem Viewport.
 
   return (
     <section

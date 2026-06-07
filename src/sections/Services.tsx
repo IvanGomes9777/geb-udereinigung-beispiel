@@ -80,7 +80,6 @@ export function Services() {
   const headRef = useRef<HTMLDivElement>(null)
   const scrollerRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
-  const stRef = useRef<ScrollTrigger | null>(null)
   const reduced = useReducedMotion()
   const [active, setActive] = useState(0)
 
@@ -109,77 +108,35 @@ export function Services() {
     return () => ctx.revert()
   }, [reduced])
 
-  // ---------- HORIZONTAL PIN-SCROLL ----------
-  // Vertikales Scrollen pinnt die Section und uebersetzt sich in horizontale
-  // Card-Translation. Nachdem alle Karten durchgangen sind, faehrt die Page
-  // normal weiter zur naechsten Section.
+  // ---------- ACTIVE CARD DETECTION via Intersection ----------
   useEffect(() => {
-    const sectionEl = sectionRef.current
-    if (!sectionEl || !trackRef.current || !scrollerRef.current) return
+    const scroller = scrollerRef.current
+    if (!scroller) return
+    const cards = Array.from(
+      scroller.querySelectorAll<HTMLElement>('[data-service-card]')
+    )
+    if (cards.length === 0) return
 
-    const ctx = gsap.context(() => {
-      const track = trackRef.current!
-      const scroller = scrollerRef.current!
-
-      if (reduced) {
-        // Reduced-Motion-Fallback: kein Pin, kein Scrub — Native Touch/Drag bleibt
-        scroller.style.overflowX = 'auto'
-        scroller.style.scrollSnapType = 'x mandatory'
-        return
-      }
-
-      // Pin nur ab >= 768px (Tablet+). Auf Mobile bleibt Native-Scroll.
-      const mm = gsap.matchMedia()
-      mm.add('(min-width: 768px)', () => {
-        const distance = () =>
-          Math.max(0, track.scrollWidth - scroller.clientWidth)
-
-        const tween = gsap.to(track, {
-          x: () => -distance(),
-          ease: 'none',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top top',
-            end: () => `+=${distance() + 200}`,
-            pin: true,
-            scrub: 1,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              const idx = Math.min(
-                Math.round(self.progress * (SERVICES.length - 1)),
-                SERVICES.length - 1
-              )
-              setActive(idx)
-            },
-          },
+    const io = new IntersectionObserver(
+      (entries) => {
+        let best = 0
+        let bestIdx = 0
+        entries.forEach((e) => {
+          if (e.intersectionRatio > best) {
+            best = e.intersectionRatio
+            bestIdx = cards.indexOf(e.target as HTMLElement)
+          }
         })
-        stRef.current = tween.scrollTrigger ?? null
+        if (best > 0 && bestIdx >= 0) setActive(bestIdx)
+      },
+      { root: scroller, threshold: [0.4, 0.6, 0.8, 1] }
+    )
+    cards.forEach((c) => io.observe(c))
+    return () => io.disconnect()
+  }, [])
 
-        return () => {
-          stRef.current = null
-        }
-      })
-
-      mm.add('(max-width: 767px)', () => {
-        scroller.style.overflowX = 'auto'
-        scroller.style.scrollSnapType = 'x mandatory'
-      })
-    }, sectionEl)
-    return () => ctx.revert()
-  }, [reduced])
-
-  // Pagination-Button -> Scroll auf die entsprechende Karte
+  // Pagination -> Native horizontal scroll
   const scrollToCard = (index: number) => {
-    const st = stRef.current
-    if (st) {
-      // Pin-Mode (Desktop/Tablet) — berechne absolute Scroll-Position
-      const progress = SERVICES.length > 1 ? index / (SERVICES.length - 1) : 0
-      const targetY = st.start + (st.end - st.start) * progress
-      window.scrollTo({ top: targetY, behavior: 'smooth' })
-      return
-    }
-    // Mobile / Reduced-Motion-Fallback — Native horizontal scroll
     const scroller = scrollerRef.current
     if (!scroller) return
     const card = scroller.querySelectorAll<HTMLElement>('[data-service-card]')[
@@ -195,15 +152,9 @@ export function Services() {
       id="leistungen"
       className="relative w-full overflow-hidden flex flex-col"
       style={{
-        height: '100dvh',
-        minHeight: '640px',
+        minHeight: '100dvh',
         backgroundColor: '#0e0d0a',
         color: '#f5f2eb',
-        borderTopLeftRadius: '32px',
-        borderTopRightRadius: '32px',
-        marginTop: '-32px',
-        zIndex: 6,
-        boxShadow: '0 -20px 50px -28px rgba(0,0,0,0.45)',
       }}
     >
       {/* Atmosphaeren-Schichten */}
@@ -307,28 +258,28 @@ export function Services() {
           </h2>
         </div>
 
-        {/* CAROUSEL — Scroller mit overflow:hidden, Track wird via GSAP horizontal translatet.
-            Auf Mobile (< 768px) faellt der Hook automatisch auf overflow-x:auto + scroll-snap zurueck. */}
+        {/* CAROUSEL — native horizontal scroll mit Snap. Funktioniert auf Touch + Maus. */}
         <div className="flex-1 flex items-center mt-6 lg:mt-8" style={{ minHeight: 0 }}>
           <div
             ref={scrollerRef}
             className="w-full h-full"
             style={{
-              overflowX: 'hidden',
+              overflowX: 'auto',
               overflowY: 'hidden',
               WebkitOverflowScrolling: 'touch',
+              scrollSnapType: 'x mandatory',
+              scrollPaddingLeft:
+                'max(24px, calc((100vw - var(--container-max)) / 2 + 24px))',
             }}
           >
             <div
               ref={trackRef}
               className="flex gap-4 lg:gap-5 h-full"
               style={{
-                willChange: 'transform',
                 paddingLeft:
                   'max(24px, calc((100vw - var(--container-max)) / 2 + 24px))',
                 paddingRight:
                   'max(24px, calc((100vw - var(--container-max)) / 2 + 24px))',
-                scrollSnapType: 'none', // wird auf Mobile per JS gesetzt
                 width: 'max-content',
               }}
             >

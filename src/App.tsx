@@ -3,11 +3,11 @@ import { Hero } from './sections/Hero'
 import { AboutUs } from './sections/AboutUs'
 import { Services } from './sections/Services'
 import { Reviews } from './sections/Reviews'
-import { useSmoothScroll } from './hooks/useSmoothScroll'
+import { OpeningHours } from './sections/OpeningHours'
+import { Contact } from './sections/Contact'
+import { Footer } from './sections/Footer'
 
 export default function App() {
-  useSmoothScroll()
-
   return (
     <>
       <Header />
@@ -16,32 +16,10 @@ export default function App() {
         <AboutUs />
         <Services />
         <Reviews />
-        {/* Placeholder for upcoming sections */}
-        <section
-          aria-hidden
-          style={{
-            minHeight: '40vh',
-            background: 'var(--color-bg-base)',
-            borderTop: '1px solid var(--color-line)',
-            display: 'grid',
-            placeItems: 'center',
-            padding: '4rem 1.5rem',
-          }}
-        >
-          <p
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              color: 'var(--color-ink-muted)',
-              textAlign: 'center',
-            }}
-          >
-            N° 05 — ÖFFNUNGSZEITEN · in Vorbereitung
-          </p>
-        </section>
+        <OpeningHours />
+        <Contact />
       </main>
+      <Footer />
     </>
   )
 }

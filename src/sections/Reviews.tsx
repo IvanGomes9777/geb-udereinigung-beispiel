@@ -188,15 +188,9 @@ export function Reviews() {
       id="bewertungen"
       className="relative w-full overflow-hidden flex flex-col"
       style={{
-        height: '100dvh',
-        minHeight: '640px',
+        minHeight: '100dvh',
         backgroundColor: '#efede7',
         color: 'var(--color-ink-primary)',
-        borderTopLeftRadius: '32px',
-        borderTopRightRadius: '32px',
-        marginTop: '-32px',
-        zIndex: 7,
-        boxShadow: '0 -20px 50px -28px rgba(0,0,0,0.45)',
       }}
     >
       <div
