@@ -2,10 +2,6 @@ import { Header } from './components/Header'
 import { Hero } from './sections/Hero'
 import { AboutUs } from './sections/AboutUs'
 import { Services } from './sections/Services'
-import { Reviews } from './sections/Reviews'
-import { OpeningHours } from './sections/OpeningHours'
-import { Contact } from './sections/Contact'
-import { Footer } from './sections/Footer'
 
 export default function App() {
   return (
@@ -15,11 +11,32 @@ export default function App() {
         <Hero />
         <AboutUs />
         <Services />
-        <Reviews />
-        <OpeningHours />
-        <Contact />
+        {/* Platzhalter — wartet auf Freigabe fuer Section 4 */}
+        <section
+          aria-hidden
+          style={{
+            minHeight: '40vh',
+            background: 'var(--color-bg-base)',
+            borderTop: '1px solid var(--color-line)',
+            display: 'grid',
+            placeItems: 'center',
+            padding: '4rem 1.5rem',
+          }}
+        >
+          <p
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+              color: 'var(--color-ink-muted)',
+              textAlign: 'center',
+            }}
+          >
+            N° 04 — wartet auf Layout-Freigabe
+          </p>
+        </section>
       </main>
-      <Footer />
     </>
   )
 }
