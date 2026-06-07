@@ -27,7 +27,8 @@ export function Reviews() {
   const reduced = useReducedMotion()
 
   useEffect(() => {
-    if (!sectionRef.current) return
+    const sectionEl = sectionRef.current
+    if (!sectionEl) return
     if (reduced) return
 
     const ctx = gsap.context(() => {
@@ -154,8 +155,10 @@ export function Reviews() {
         )
       }
 
-      // 7) Counter animation
-      const counters = gsap.utils.toArray<HTMLElement>('[data-counter]')
+      // 7) Counter animation — mit null-safety auf el (HMR-Stale-Schutz)
+      const counters = sectionEl.querySelectorAll<HTMLElement>(
+        '[data-counter]'
+      )
       counters.forEach((el) => {
         const target = parseFloat(el.dataset.counter || '0')
         const decimals = (el.dataset.counter || '0').split('.')[1]?.length || 0
@@ -165,6 +168,7 @@ export function Reviews() {
           duration: 2.0,
           ease: 'expo.out',
           onUpdate: () => {
+            if (!el || !el.isConnected) return
             el.textContent = proxy.v.toFixed(decimals).replace('.', ',')
           },
           scrollTrigger: {
@@ -174,7 +178,7 @@ export function Reviews() {
           },
         })
       })
-    }, sectionRef)
+    }, sectionEl)
     return () => ctx.revert()
   }, [reduced])
 

@@ -79,7 +79,8 @@ export function Hero() {
 
   // ---------- Entrance animation ----------
   useEffect(() => {
-    if (!headlineRef.current) return
+    const sectionEl = sectionRef.current
+    if (!sectionEl || !headlineRef.current) return
 
     const ctx = gsap.context(() => {
       const lines = headlineRef.current!.querySelectorAll<HTMLSpanElement>(
@@ -108,7 +109,7 @@ export function Hero() {
           { x: 24, opacity: 0, duration: 0.95 },
           '-=0.75'
         )
-    }, sectionRef)
+    }, sectionEl)
 
     return () => ctx.revert()
   }, [reduced])
@@ -116,7 +117,8 @@ export function Hero() {
   // ---------- Scroll-driven cinematic parallax ----------
   useEffect(() => {
     if (reduced) return
-    if (!sectionRef.current || !bgWrapRef.current || !innerRef.current) return
+    const sectionEl = sectionRef.current
+    if (!sectionEl || !bgWrapRef.current || !innerRef.current) return
 
     const ctx = gsap.context(() => {
       gsap.to(bgWrapRef.current, {
@@ -141,7 +143,7 @@ export function Hero() {
           scrub: 0.5,
         },
       })
-    }, sectionRef)
+    }, sectionEl)
 
     return () => ctx.revert()
   }, [reduced])

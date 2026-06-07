@@ -62,7 +62,8 @@ export function AboutUs() {
   const reduced = useReducedMotion()
 
   useEffect(() => {
-    if (!sectionRef.current) return
+    const sectionEl = sectionRef.current
+    if (!sectionEl) return
     const ctx = gsap.context(() => {
       if (reduced) return
 
@@ -176,7 +177,7 @@ export function AboutUs() {
           },
         })
       })
-    }, sectionRef)
+    }, sectionEl)
     return () => ctx.revert()
   }, [reduced])
 

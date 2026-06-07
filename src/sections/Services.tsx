@@ -86,7 +86,8 @@ export function Services() {
 
   // ---------- HEAD reveal (laeuft bevor pin engaged) ----------
   useEffect(() => {
-    if (!sectionRef.current) return
+    const sectionEl = sectionRef.current
+    if (!sectionEl) return
     const ctx = gsap.context(() => {
       if (reduced) return
       const headEls = headRef.current?.children
@@ -104,7 +105,7 @@ export function Services() {
           },
         })
       }
-    }, sectionRef)
+    }, sectionEl)
     return () => ctx.revert()
   }, [reduced])
 
@@ -113,7 +114,8 @@ export function Services() {
   // Card-Translation. Nachdem alle Karten durchgangen sind, faehrt die Page
   // normal weiter zur naechsten Section.
   useEffect(() => {
-    if (!sectionRef.current || !trackRef.current || !scrollerRef.current) return
+    const sectionEl = sectionRef.current
+    if (!sectionEl || !trackRef.current || !scrollerRef.current) return
 
     const ctx = gsap.context(() => {
       const track = trackRef.current!
@@ -163,7 +165,7 @@ export function Services() {
         scroller.style.overflowX = 'auto'
         scroller.style.scrollSnapType = 'x mandatory'
       })
-    }, sectionRef)
+    }, sectionEl)
     return () => ctx.revert()
   }, [reduced])
 
