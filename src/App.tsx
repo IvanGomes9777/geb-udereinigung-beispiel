@@ -1,6 +1,7 @@
 import { Header } from './components/Header'
 import { Hero } from './sections/Hero'
 import { AboutUs } from './sections/AboutUs'
+import { Services } from './sections/Services'
 import { useSmoothScroll } from './hooks/useSmoothScroll'
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
       <main>
         <Hero />
         <AboutUs />
+        <Services />
         {/* Placeholder for upcoming sections */}
         <section
           aria-hidden
@@ -34,7 +36,7 @@ export default function App() {
               textAlign: 'center',
             }}
           >
-            N° 03 — LEISTUNGEN · in Vorbereitung
+            N° 04 — GOOGLE BEWERTUNGEN · in Vorbereitung
           </p>
         </section>
       </main>
