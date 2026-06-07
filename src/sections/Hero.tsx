@@ -6,7 +6,11 @@ import { HeroBackground, HERO_SCENES, type HeroScene } from '../components/HeroB
 
 gsap.registerPlugin(ScrollTrigger)
 
-const HEADLINE_LINES = ['Sauber-', 'keit als', 'Hand-', 'werk.']
+const HEADLINE_LINES = [
+  { text: 'Sauberkeit', italic: false, weight: 500, indent: 0 },
+  { text: 'als', italic: true, weight: 200, indent: 0.5 },
+  { text: 'Handwerk.', italic: false, weight: 500, indent: 0 },
+] as const
 
 function useLiveTime() {
   const [time, setTime] = useState(() => {
@@ -33,7 +37,7 @@ function useLiveTime() {
   return time
 }
 
-function useTypewriter(text: string, speedMs = 28, startDelayMs = 200) {
+function useTypewriter(text: string, speedMs = 24, startDelayMs = 200) {
   const [out, setOut] = useState('')
   useEffect(() => {
     let i = 0
@@ -70,7 +74,6 @@ export function Hero() {
     setSceneIndex(i)
   }, [])
 
-  // Eyebrow zeigt dynamisch die aktuelle Szene
   const eyebrowText = `N° 01 — REFLECTION STUDY · ${scene.label} · MÜNSTER`
   const eyebrow = useTypewriter(eyebrowText, 22, 120)
 
@@ -97,27 +100,27 @@ export function Hero() {
       tl.from(lines, {
         yPercent: 110,
         opacity: 0,
-        duration: 1.2,
-        stagger: 0.09,
+        duration: 1.15,
+        stagger: 0.085,
       })
         .from(
           cardRef.current,
-          { y: 28, opacity: 0, duration: 1.0 },
-          '-=0.7'
+          { x: 24, opacity: 0, duration: 0.95 },
+          '-=0.75'
         )
     }, sectionRef)
 
     return () => ctx.revert()
   }, [reduced])
 
-  // ---------- Scroll-driven: Photo-BG zoomt + driftet hoch (cinematic) ----------
+  // ---------- Scroll-driven cinematic parallax ----------
   useEffect(() => {
     if (reduced) return
     if (!sectionRef.current || !bgWrapRef.current || !innerRef.current) return
 
     const ctx = gsap.context(() => {
       gsap.to(bgWrapRef.current, {
-        yPercent: -14,
+        yPercent: -12,
         scale: 1.08,
         ease: 'none',
         scrollTrigger: {
@@ -128,8 +131,8 @@ export function Hero() {
         },
       })
       gsap.to(innerRef.current, {
-        yPercent: -8,
-        opacity: 0.6,
+        yPercent: -10,
+        opacity: 0.5,
         ease: 'none',
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -147,11 +150,10 @@ export function Hero() {
     <section
       ref={sectionRef}
       id="hero"
-      className="relative w-full overflow-hidden"
+      className="relative w-full overflow-hidden flex flex-col"
       style={{
-        minHeight: '100dvh',
-        paddingTop: 'clamp(96px, 12vh, 132px)',
-        paddingBottom: 'clamp(88px, 10vh, 120px)',
+        height: '100dvh',
+        minHeight: '640px',
         color: 'var(--color-bg-base)',
       }}
     >
@@ -160,22 +162,27 @@ export function Hero() {
         <HeroBackground onSceneChange={handleSceneChange} />
       </div>
 
-      {/* ---------- CONTENT ---------- */}
+      {/* ---------- CONTENT (vertical flex 3-zone: top eyebrow / middle stage / bottom strip) ---------- */}
       <div
         ref={innerRef}
-        className="relative mx-auto px-6 lg:px-10"
-        style={{ maxWidth: 'var(--container-max)', zIndex: 2 }}
+        className="relative flex-1 flex flex-col mx-auto w-full px-6 lg:px-10"
+        style={{
+          maxWidth: 'var(--container-max)',
+          zIndex: 2,
+          paddingTop: 'clamp(80px, 11vh, 112px)',
+          paddingBottom: 'clamp(56px, 7vh, 80px)',
+        }}
       >
-        {/* Editorial marker — dynamisch mit Szene */}
+        {/* Editorial marker — dynamisch */}
         <p
-          className="text-[11px] mb-8 lg:mb-12"
+          className="text-[11px]"
           style={{
             fontFamily: 'var(--font-mono)',
-            letterSpacing: '0.18em',
+            letterSpacing: '0.20em',
             textTransform: 'uppercase',
-            color: 'rgba(239,237,231,0.78)',
+            color: 'rgba(245,242,235,0.78)',
             minHeight: '1.2em',
-            textShadow: '0 1px 4px rgba(0,0,0,0.4)',
+            textShadow: '0 1px 6px rgba(0,0,0,0.45)',
           }}
         >
           {eyebrow}
@@ -197,241 +204,253 @@ export function Hero() {
           />
         </p>
 
-        <div className="grid grid-cols-12 gap-x-4 lg:gap-x-6">
-          {/* ---------- HEADLINE ---------- */}
-          <h1
-            ref={headlineRef}
-            className="col-span-12 lg:col-span-9"
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(56px, 11.5vw, 192px)',
-              lineHeight: 0.94,
-              letterSpacing: '-0.04em',
-              fontWeight: 350,
-              color: '#f5f2eb',
-              margin: 0,
-              textShadow: '0 2px 24px rgba(0,0,0,0.35)',
-            }}
-          >
-            {HEADLINE_LINES.map((line, i) => (
-              <span
-                key={i}
-                className="block overflow-hidden"
-                style={{ paddingBottom: '0.04em' }}
-              >
-                <span
-                  data-headline-line
-                  className="inline-block will-change-transform"
-                  style={{
-                    fontStyle: i === 1 ? 'italic' : 'normal',
-                    fontWeight: i === 1 ? 300 : 350,
-                  }}
-                >
-                  {line}
-                </span>
-              </span>
-            ))}
-          </h1>
-
-          {/* ---------- GLASMORPHISM CONTENT CARD ---------- */}
-          <div
-            ref={cardRef}
-            className="col-span-12 md:col-span-10 lg:col-span-7 mt-10 lg:mt-14"
-            style={{
-              backdropFilter: 'blur(22px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(22px) saturate(180%)',
-              background:
-                'linear-gradient(135deg, rgba(239,237,231,0.16) 0%, rgba(239,237,231,0.08) 100%)',
-              border: '1px solid rgba(255,255,255,0.20)',
-              borderRadius: '4px',
-              padding: 'clamp(20px, 2.4vw, 36px)',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.35), 0 30px 60px -24px rgba(0,0,0,0.45)',
-            }}
-          >
-            {/* Lead — gestrafft für cinematic Tonalität */}
-            <p
+        {/* ---------- STAGE: vertikal zentriert, Headline links / Card rechts ---------- */}
+        <div className="flex-1 flex items-center">
+          <div className="grid grid-cols-12 gap-x-6 lg:gap-x-10 w-full">
+            {/* ----- HEADLINE (LEFT) ----- */}
+            <h1
+              ref={headlineRef}
+              className="col-span-12 lg:col-span-7 m-0"
               style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'clamp(15px, 1.25vw, 18px)',
-                lineHeight: 1.55,
-                color: 'rgba(245,242,235,0.88)',
-                margin: 0,
-                maxWidth: '52ch',
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(56px, 9vw, 144px)',
+                lineHeight: 0.88,
+                letterSpacing: '-0.045em',
+                color: '#f5f2eb',
+                fontVariationSettings:
+                  '"opsz" 144, "SOFT" 50, "WONK" 1',
+                textShadow: '0 2px 32px rgba(0,0,0,0.42)',
               }}
             >
-              Seit <span data-placeholder>2019</span> reinigt{' '}
-              <span style={{ color: '#f5f2eb', fontWeight: 500 }}>KLARWERK</span>{' '}
-              Gewerbeobjekte, Praxen und Wohnanlagen in{' '}
-              <span data-placeholder>Münster</span>.
-              <span
-                className="block mt-2.5"
-                style={{
-                  color: '#f5f2eb',
-                  fontWeight: 500,
-                  fontStyle: 'italic',
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(17px, 1.4vw, 21px)',
-                  letterSpacing: '-0.01em',
-                }}
-              >
-                Kein Subunternehmer. Kein Schnellschuss.
-              </span>
-            </p>
-
-            {/* CTA-Row */}
-            <div className="mt-7 lg:mt-9 flex flex-col sm:flex-row sm:items-stretch gap-3">
-              {/* Primary: Termin */}
-              <a
-                href="#termin"
-                className="group relative inline-flex items-center justify-center gap-3 px-6 py-4 overflow-hidden transition-transform active:scale-[0.98] flex-1 sm:flex-none"
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '12.5px',
-                  letterSpacing: '0.16em',
-                  textTransform: 'uppercase',
-                  backgroundColor: '#f5f2eb',
-                  color: 'var(--color-ink-primary)',
-                  borderRadius: '2px',
-                  minHeight: '52px',
-                }}
-              >
+              {HEADLINE_LINES.map((line, i) => (
                 <span
-                  aria-hidden
-                  className="absolute inset-0 -z-0 transition-transform duration-500"
+                  key={i}
+                  className="block overflow-hidden"
                   style={{
-                    background: 'var(--color-accent)',
-                    transform: 'translateX(-101%)',
+                    paddingBottom: '0.04em',
+                    marginLeft: `${line.indent}em`,
                   }}
-                  data-cta-fill
-                />
-                <span className="relative z-10 inline-flex items-center gap-3">
+                >
                   <span
-                    aria-hidden
+                    data-headline-line
+                    className="inline-block will-change-transform"
                     style={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: '50%',
-                      border: '1px solid currentColor',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 13,
+                      fontStyle: line.italic ? 'italic' : 'normal',
+                      fontWeight: line.weight,
+                      fontVariationSettings: line.italic
+                        ? '"opsz" 144, "SOFT" 100, "WONK" 1'
+                        : '"opsz" 144, "SOFT" 50, "WONK" 1',
+                      color: line.italic ? 'rgba(245,242,235,0.88)' : '#f5f2eb',
+                      letterSpacing: line.italic ? '-0.02em' : '-0.045em',
+                      fontSize: line.italic ? '0.72em' : '1em',
                     }}
                   >
-                    ✦
+                    {line.text}
                   </span>
-                  Termin vereinbaren
                 </span>
-                <span
-                  className="relative z-10 transition-transform group-hover:translate-x-1"
-                  aria-hidden
-                >
-                  →
-                </span>
-              </a>
+              ))}
+            </h1>
 
-              {/* Secondary: Angebot */}
-              <a
-                href="#kontakt"
-                className="group inline-flex items-center justify-center gap-3 px-6 py-4 transition-all flex-1 sm:flex-none"
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '12px',
-                  letterSpacing: '0.16em',
-                  textTransform: 'uppercase',
-                  color: '#f5f2eb',
-                  border: '1px solid rgba(245,242,235,0.6)',
-                  background: 'rgba(245,242,235,0.04)',
-                  borderRadius: '2px',
-                  minHeight: '52px',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(245,242,235,0.18)'
-                  e.currentTarget.style.borderColor = '#f5f2eb'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(245,242,235,0.04)'
-                  e.currentTarget.style.borderColor = 'rgba(245,242,235,0.6)'
-                }}
-              >
-                <span>Angebot anfragen</span>
-                <span className="transition-transform group-hover:translate-x-1">
-                  →
-                </span>
-              </a>
-            </div>
-
-            {/* Tertiary: phone */}
-            <a
-              href="tel:+49251XXXXXXX"
-              className="inline-flex items-center gap-3 mt-5"
+            {/* ----- GLASMORPHISM CARD (RIGHT) ----- */}
+            <div
+              ref={cardRef}
+              className="col-span-12 lg:col-span-5 mt-8 lg:mt-0 self-center"
               style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '12px',
-                letterSpacing: '0.06em',
-                color: 'rgba(245,242,235,0.75)',
-                textDecoration: 'underline',
-                textUnderlineOffset: '4px',
-                textDecorationThickness: '1px',
+                backdropFilter: 'blur(24px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+                background:
+                  'linear-gradient(135deg, rgba(245,242,235,0.18) 0%, rgba(245,242,235,0.08) 100%)',
+                border: '1px solid rgba(255,255,255,0.22)',
+                borderRadius: '3px',
+                padding: 'clamp(22px, 2.2vw, 32px)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.4), 0 30px 70px -28px rgba(0,0,0,0.55)',
               }}
             >
-              <span aria-hidden>☎</span>
-              +49 251 [XXX XXXX]
-            </a>
-
-            {/* Mini social-proof inside card */}
-            <div
-              className="mt-6 pt-5 flex items-center gap-4 flex-wrap"
-              style={{ borderTop: '1px solid rgba(245,242,235,0.18)' }}
-            >
-              <span
+              {/* Mini-Eyebrow inside card */}
+              <p
                 style={{
                   fontFamily: 'var(--font-mono)',
-                  fontSize: '11px',
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(245,242,235,0.85)',
-                }}
-              >
-                <span style={{ color: 'var(--color-accent)', marginRight: 6 }}>★</span>
-                4,9 / 127 Bewertungen
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '11px',
-                  letterSpacing: '0.14em',
+                  fontSize: '10px',
+                  letterSpacing: '0.22em',
                   textTransform: 'uppercase',
                   color: 'rgba(245,242,235,0.55)',
+                  margin: '0 0 14px 0',
                 }}
               >
-                · Versichert · TÜV-geprüfte Reinigungsmittel
-              </span>
+                Gebäudereinigung · seit 2019
+              </p>
+
+              {/* Lead (kurz, 2 Saetze) */}
+              <p
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 'clamp(15px, 1.05vw, 17px)',
+                  lineHeight: 1.55,
+                  color: 'rgba(245,242,235,0.92)',
+                  margin: 0,
+                }}
+              >
+                Fassaden, Büros, Praxen und Wohnanlagen in{' '}
+                <span style={{ color: '#f5f2eb', fontWeight: 500 }}>Münster</span>.
+                <span
+                  className="block mt-2"
+                  style={{
+                    color: '#f5f2eb',
+                    fontWeight: 500,
+                    fontStyle: 'italic',
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 'clamp(16px, 1.15vw, 19px)',
+                    fontVariationSettings: '"opsz" 36, "SOFT" 80',
+                    letterSpacing: '-0.005em',
+                  }}
+                >
+                  Kein Subunternehmer. Kein Schnellschuss.
+                </span>
+              </p>
+
+              {/* CTAs gestapelt — alle gleich breit */}
+              <div className="mt-6 flex flex-col gap-2.5">
+                {/* Primary */}
+                <a
+                  href="#termin"
+                  className="group relative inline-flex items-center justify-between gap-3 px-5 py-3.5 overflow-hidden transition-transform active:scale-[0.99]"
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '12px',
+                    letterSpacing: '0.16em',
+                    textTransform: 'uppercase',
+                    backgroundColor: '#f5f2eb',
+                    color: 'var(--color-ink-primary)',
+                    borderRadius: '2px',
+                    minHeight: '48px',
+                  }}
+                >
+                  <span
+                    aria-hidden
+                    className="absolute inset-0 -z-0 transition-transform duration-500"
+                    style={{
+                      background: 'var(--color-accent)',
+                      transform: 'translateX(-101%)',
+                    }}
+                    data-cta-fill
+                  />
+                  <span className="relative z-10 inline-flex items-center gap-2.5">
+                    <span
+                      aria-hidden
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: '50%',
+                        border: '1px solid currentColor',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 11,
+                      }}
+                    >
+                      ✦
+                    </span>
+                    Termin vereinbaren
+                  </span>
+                  <span
+                    className="relative z-10 transition-transform group-hover:translate-x-1"
+                    aria-hidden
+                  >
+                    →
+                  </span>
+                </a>
+
+                {/* Secondary */}
+                <a
+                  href="#kontakt"
+                  className="group inline-flex items-center justify-between gap-3 px-5 py-3.5 transition-all"
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '11.5px',
+                    letterSpacing: '0.16em',
+                    textTransform: 'uppercase',
+                    color: '#f5f2eb',
+                    border: '1px solid rgba(245,242,235,0.55)',
+                    background: 'rgba(245,242,235,0.04)',
+                    borderRadius: '2px',
+                    minHeight: '46px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(245,242,235,0.18)'
+                    e.currentTarget.style.borderColor = '#f5f2eb'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(245,242,235,0.04)'
+                    e.currentTarget.style.borderColor = 'rgba(245,242,235,0.55)'
+                  }}
+                >
+                  <span>Angebot anfragen</span>
+                  <span className="transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </a>
+              </div>
+
+              {/* Phone + Trust-Strip in einer Zeile, Trennlinie oben */}
+              <div
+                className="mt-5 pt-4 flex items-center justify-between gap-3 flex-wrap"
+                style={{ borderTop: '1px solid rgba(245,242,235,0.18)' }}
+              >
+                <a
+                  href="tel:+49251XXXXXXX"
+                  className="inline-flex items-center gap-2"
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '11px',
+                    letterSpacing: '0.08em',
+                    color: 'rgba(245,242,235,0.85)',
+                    textDecoration: 'underline',
+                    textUnderlineOffset: '3px',
+                    textDecorationThickness: '1px',
+                  }}
+                >
+                  <span aria-hidden>☎</span>+49 251 [XXX XXXX]
+                </a>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '10px',
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(245,242,235,0.7)',
+                  }}
+                >
+                  <span style={{ color: 'var(--color-accent)', marginRight: 4 }}>
+                    ★
+                  </span>
+                  4,9 · 127 Bewertungen
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ---------- HERO FOOTER STRIP ---------- */}
+      {/* ---------- HERO FOOTER STRIP (immer am Boden) ---------- */}
       <div
-        className="absolute left-0 right-0 bottom-0"
+        className="relative w-full"
         style={{
           borderTop: '1px solid rgba(245,242,235,0.18)',
           background:
-            'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.35) 100%)',
+            'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.42) 100%)',
           zIndex: 3,
         }}
       >
         <div
-          className="mx-auto px-6 lg:px-10 py-4 flex items-center justify-between gap-6 flex-wrap"
+          className="mx-auto px-6 lg:px-10 py-3.5 flex items-center justify-between gap-6 flex-wrap"
           style={{
             maxWidth: 'var(--container-max)',
             fontFamily: 'var(--font-mono)',
             fontSize: '10px',
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
-            color: 'rgba(245,242,235,0.7)',
+            color: 'rgba(245,242,235,0.72)',
           }}
         >
           <span className="inline-flex items-center gap-2">
@@ -439,13 +458,14 @@ export function Hero() {
               className="inline-block w-1.5 h-1.5 rounded-full"
               style={{
                 background: 'var(--color-accent)',
-                animation: reduced ? 'none' : 'accent-pulse 2.4s ease-in-out infinite',
+                animation: reduced
+                  ? 'none'
+                  : 'accent-pulse 2.4s ease-in-out infinite',
               }}
             />
             {liveTime} · MÜNSTER
           </span>
 
-          {/* Scene indicator + progress dots */}
           <span className="inline-flex items-center gap-3">
             <span style={{ color: 'rgba(245,242,235,0.55)' }}>
               REFL · {scene.label}
@@ -457,13 +477,14 @@ export function Hero() {
                   aria-label={s.label}
                   style={{
                     display: 'inline-block',
-                    width: sceneIndex === i ? 16 : 5,
+                    width: sceneIndex === i ? 18 : 5,
                     height: 2,
                     background:
                       sceneIndex === i
                         ? '#f5f2eb'
-                        : 'rgba(245,242,235,0.35)',
-                    transition: 'width 600ms cubic-bezier(0.25,1,0.5,1), background 400ms',
+                        : 'rgba(245,242,235,0.32)',
+                    transition:
+                      'width 600ms cubic-bezier(0.25,1,0.5,1), background 400ms',
                   }}
                 />
               ))}
@@ -471,11 +492,13 @@ export function Hero() {
           </span>
 
           <span className="hidden sm:inline-flex items-center gap-2">
-            Scroll to explore
+            Scroll
             <span
               aria-hidden
               className="inline-block"
-              style={{ animation: reduced ? 'none' : 'scroll-arrow 1.6s ease-in-out infinite' }}
+              style={{
+                animation: reduced ? 'none' : 'scroll-arrow 1.6s ease-in-out infinite',
+              }}
             >
               ↓
             </span>
@@ -483,7 +506,6 @@ export function Hero() {
         </div>
       </div>
 
-      {/* keyframes */}
       <style>{`
         @keyframes caret {
           0%, 100% { opacity: 0 }
