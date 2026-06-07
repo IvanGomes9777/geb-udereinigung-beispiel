@@ -338,21 +338,29 @@ export function Hero() {
                 }}
               />
 
-              {/* the main rotating glass shard */}
+              {/* float-wrapper: nur translateY (CSS) — separiert vom GSAP-Element,
+                  damit GSAP-Rotation (rotateX/Y) nicht von der CSS-Keyframe ueberschrieben wird. */}
               <div
-                ref={sculptureRef}
-                aria-hidden
                 className="relative mx-auto"
                 style={{
                   width: 'clamp(180px, 22vw, 320px)',
                   aspectRatio: '3 / 4',
-                  borderRadius: '24px',
-                  transformStyle: 'preserve-3d',
+                  zIndex: 1,
                   animation: reduced
                     ? 'none'
                     : 'glass-float 7s ease-in-out infinite',
                   willChange: 'transform',
-                  zIndex: 1,
+                }}
+              >
+              {/* the main rotating glass shard — alle Transforms via GSAP */}
+              <div
+                ref={sculptureRef}
+                aria-hidden
+                className="relative w-full h-full"
+                style={{
+                  borderRadius: '24px',
+                  transformStyle: 'preserve-3d',
+                  willChange: 'transform',
                 }}
               >
                 {/* outer glass plate — verstärkter Glasmorphism */}
@@ -437,6 +445,7 @@ export function Hero() {
                       : 'accent-pulse 2.4s ease-in-out infinite',
                   }}
                 />
+              </div>
               </div>
 
               {/* social-proof badge below the sculpture */}
@@ -648,8 +657,8 @@ export function Hero() {
           50% { opacity: 1 }
         }
         @keyframes glass-float {
-          0%, 100% { transform: translateY(0) rotateX(2deg); }
-          50% { transform: translateY(-8px) rotateX(-2deg); }
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
         }
         @keyframes glass-float-slow {
           0%, 100% { transform: translateY(0) rotate(-6deg); }
