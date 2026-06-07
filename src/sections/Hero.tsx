@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useReducedMotion } from '../hooks/useReducedMotion'
+import { ReflectionLoop } from '../components/ReflectionLoop'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -168,10 +169,66 @@ export function Hero() {
         paddingBottom: 'clamp(72px, 8vh, 96px)',
       }}
     >
-      {/* faint grid overlay for editorial feel */}
+      {/* ---------- BACKGROUND: SOFT-MORPHISM ORBS ----------
+          Diese großen, weichgeblurrten Farb-Orbs geben dem
+          backdrop-filter der Glas-Sculpture etwas zum Refraktieren.
+          Ohne sie würde der Glaseffekt auf cremefarbenem Grund
+          unsichtbar bleiben. */}
       <div
         aria-hidden
-        className="absolute inset-0 pointer-events-none opacity-[0.04]"
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+      >
+        {/* Orange-Akzent oben rechts */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '8%',
+            right: '6%',
+            width: 'clamp(320px, 38vw, 620px)',
+            height: 'clamp(320px, 38vw, 620px)',
+            borderRadius: '50%',
+            background:
+              'radial-gradient(circle, rgba(255,87,34,0.55) 0%, rgba(255,87,34,0) 65%)',
+            filter: 'blur(60px)',
+            animation: 'orb-drift-a 18s ease-in-out infinite',
+          }}
+        />
+        {/* Cool-Cyan unten links */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '12%',
+            left: '-4%',
+            width: 'clamp(280px, 32vw, 540px)',
+            height: 'clamp(280px, 32vw, 540px)',
+            borderRadius: '50%',
+            background:
+              'radial-gradient(circle, rgba(110,180,210,0.45) 0%, rgba(110,180,210,0) 65%)',
+            filter: 'blur(70px)',
+            animation: 'orb-drift-b 22s ease-in-out infinite',
+          }}
+        />
+        {/* Warmes Gelb-Beige zentriert (hinter Headline) */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '40%',
+            left: '34%',
+            width: 'clamp(240px, 28vw, 460px)',
+            height: 'clamp(240px, 28vw, 460px)',
+            borderRadius: '50%',
+            background:
+              'radial-gradient(circle, rgba(255,210,90,0.35) 0%, rgba(255,210,90,0) 65%)',
+            filter: 'blur(80px)',
+            animation: 'orb-drift-c 26s ease-in-out infinite',
+          }}
+        />
+      </div>
+
+      {/* faint editorial column grid (vorne, über Orbs, hinter Inhalt) */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none opacity-[0.05]"
         style={{
           backgroundImage:
             'linear-gradient(to right, var(--color-ink-primary) 1px, transparent 1px)',
@@ -250,8 +307,38 @@ export function Hero() {
             className="col-span-12 lg:col-span-4 mt-10 lg:mt-0 flex items-start justify-center lg:justify-end"
             style={{ perspective: '1200px' }}
           >
-            <div className="relative w-full max-w-[360px] lg:max-w-none">
-              {/* the rotating glass shard */}
+            <div
+              className="relative w-full max-w-[360px] lg:max-w-none"
+              style={{ minHeight: 'clamp(260px, 32vw, 460px)' }}
+            >
+              {/* small back-shard for morphism depth (statisch, leicht versetzt) */}
+              <div
+                aria-hidden
+                className="absolute"
+                style={{
+                  width: 'clamp(110px, 13vw, 180px)',
+                  aspectRatio: '3 / 4',
+                  right: 'clamp(20px, 5vw, 60px)',
+                  top: 'clamp(40px, 6vw, 80px)',
+                  borderRadius: '20px',
+                  background: `linear-gradient(160deg,
+                    rgba(255,255,255,0.45) 0%,
+                    rgba(255,255,255,0.12) 60%,
+                    rgba(110,180,210,0.18) 100%)`,
+                  border: '1px solid rgba(255,255,255,0.55)',
+                  boxShadow:
+                    'inset 0 1px 0 rgba(255,255,255,0.7), 0 20px 40px -16px rgba(14,14,14,0.18)',
+                  backdropFilter: 'blur(14px) saturate(160%)',
+                  WebkitBackdropFilter: 'blur(14px) saturate(160%)',
+                  animation: reduced
+                    ? 'none'
+                    : 'glass-float-slow 9s ease-in-out infinite',
+                  transform: 'rotate(-6deg)',
+                  zIndex: 0,
+                }}
+              />
+
+              {/* the main rotating glass shard */}
               <div
                 ref={sculptureRef}
                 aria-hidden
@@ -265,9 +352,10 @@ export function Hero() {
                     ? 'none'
                     : 'glass-float 7s ease-in-out infinite',
                   willChange: 'transform',
+                  zIndex: 1,
                 }}
               >
-                {/* outer glass plate */}
+                {/* outer glass plate — verstärkter Glasmorphism */}
                 <div
                   className="absolute inset-0"
                   style={{
@@ -275,75 +363,34 @@ export function Hero() {
                     background: `
                       linear-gradient(
                         135deg,
-                        rgba(255,255,255,0.55) 0%,
-                        rgba(255,255,255,0.18) 35%,
-                        rgba(255,87,34,0.06) 60%,
-                        rgba(255,255,255,0.4) 100%
+                        rgba(255,255,255,0.7) 0%,
+                        rgba(255,255,255,0.22) 32%,
+                        rgba(255,87,34,0.1) 58%,
+                        rgba(255,255,255,0.55) 100%
                       ),
                       radial-gradient(
                         ellipse at 28% 18%,
-                        rgba(255,255,255,0.7) 0%,
+                        rgba(255,255,255,0.85) 0%,
                         transparent 55%
                       )`,
-                    border: '1px solid rgba(255,255,255,0.7)',
+                    border: '1px solid rgba(255,255,255,0.85)',
                     boxShadow: `
-                      inset 0 1px 0 rgba(255,255,255,0.9),
-                      inset 0 -1px 0 rgba(14,14,14,0.06),
-                      0 30px 60px -20px rgba(14,14,14,0.22),
-                      0 60px 120px -40px rgba(255,87,34,0.16)`,
-                    backdropFilter: 'blur(20px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                      inset 0 1px 0 rgba(255,255,255,1),
+                      inset 0 -1px 0 rgba(14,14,14,0.08),
+                      0 30px 60px -20px rgba(14,14,14,0.28),
+                      0 60px 120px -40px rgba(255,87,34,0.22)`,
+                    backdropFilter: 'blur(24px) saturate(200%) brightness(1.06)',
+                    WebkitBackdropFilter:
+                      'blur(24px) saturate(200%) brightness(1.06)',
                   }}
                 />
 
-                {/* inner architectural reflection (SVG) */}
-                <svg
-                  className="absolute inset-0 w-full h-full"
-                  viewBox="0 0 120 160"
-                  fill="none"
-                  style={{
-                    mixBlendMode: 'multiply',
-                    opacity: 0.18,
-                    borderRadius: '24px',
-                  }}
-                  preserveAspectRatio="xMidYMid slice"
-                >
-                  {/* skyline silhouette */}
-                  <path
-                    d="M0 130 L0 100 L10 100 L10 80 L22 80 L22 95 L34 95 L34 60 L48 60 L48 50 L58 50 L58 70 L70 70 L70 45 L82 45 L82 65 L92 65 L92 78 L102 78 L102 90 L112 90 L112 105 L120 105 L120 130 Z"
-                    fill="var(--color-ink-primary)"
-                  />
-                  {/* horizon line */}
-                  <line
-                    x1="0"
-                    y1="130"
-                    x2="120"
-                    y2="130"
-                    stroke="var(--color-ink-primary)"
-                    strokeWidth="0.4"
-                  />
-                  {/* light refraction lines */}
-                  <line
-                    x1="20"
-                    y1="0"
-                    x2="80"
-                    y2="160"
-                    stroke="var(--color-ink-primary)"
-                    strokeWidth="0.3"
-                    opacity="0.4"
-                  />
-                  <line
-                    x1="100"
-                    y1="0"
-                    x2="40"
-                    y2="160"
-                    stroke="var(--color-ink-primary)"
-                    strokeWidth="0.3"
-                    opacity="0.3"
-                  />
-                </svg>
+                {/* ---------- INNER LOOP: REFLECTION STUDY ----------
+                    Vier wechselnde Innenraum-Szenen, 10s Loop, Crossfade.
+                    Drop-in fürs echte Video: ReflectionLoop → <video> tauschen. */}
+                <ReflectionLoop />
 
-                {/* corner mono mark */}
+                {/* corner mono mark top-left */}
                 <div
                   className="absolute"
                   style={{
@@ -358,11 +405,12 @@ export function Hero() {
                 >
                   KW · 01
                 </div>
+                {/* rotation marker top-right */}
                 <div
                   className="absolute"
                   style={{
-                    bottom: 14,
-                    right: 16,
+                    top: 12,
+                    right: 14,
                     fontFamily: 'var(--font-mono)',
                     fontSize: '9px',
                     letterSpacing: '0.18em',
@@ -373,7 +421,7 @@ export function Hero() {
                   Ø 360°
                 </div>
 
-                {/* accent micro dot */}
+                {/* accent micro dot — pulsiert */}
                 <div
                   className="absolute"
                   style={{
@@ -384,6 +432,9 @@ export function Hero() {
                     borderRadius: '50%',
                     background: 'var(--color-accent)',
                     boxShadow: '0 0 16px rgba(255,87,34,0.6)',
+                    animation: reduced
+                      ? 'none'
+                      : 'accent-pulse 2.4s ease-in-out infinite',
                   }}
                 />
               </div>
@@ -600,9 +651,29 @@ export function Hero() {
           0%, 100% { transform: translateY(0) rotateX(2deg); }
           50% { transform: translateY(-8px) rotateX(-2deg); }
         }
+        @keyframes glass-float-slow {
+          0%, 100% { transform: translateY(0) rotate(-6deg); }
+          50% { transform: translateY(-14px) rotate(-3deg); }
+        }
         @keyframes scroll-arrow {
           0%, 100% { transform: translateY(0); opacity: 0.4 }
           50% { transform: translateY(4px); opacity: 1 }
+        }
+        @keyframes accent-pulse {
+          0%, 100% { transform: scale(1); box-shadow: 0 0 16px rgba(255,87,34,0.6); }
+          50% { transform: scale(1.4); box-shadow: 0 0 28px rgba(255,87,34,0.9); }
+        }
+        @keyframes orb-drift-a {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(-40px, 30px) scale(1.08); }
+        }
+        @keyframes orb-drift-b {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(50px, -25px) scale(1.1); }
+        }
+        @keyframes orb-drift-c {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(-25px, -35px) scale(0.95); }
         }
         a[href="#termin"]:hover [data-cta-fill] {
           transform: translateX(0) !important;
