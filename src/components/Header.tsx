@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const NAV_ITEMS = [
@@ -9,32 +9,19 @@ const NAV_ITEMS = [
 ]
 
 export function Header() {
-  const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  // Im Top-Bereich liegt der Header ueber dem dunklen Photo-Hero → helle Schrift.
-  // Sobald gescrollt, wechselt er auf cream-blur + dunkle Schrift fuer Sections darunter.
-  const onPhoto = !scrolled
-  const fg = onPhoto ? '#f5f2eb' : 'var(--color-ink-primary)'
-  const fgMuted = onPhoto ? 'rgba(245,242,235,0.6)' : 'var(--color-ink-secondary)'
+  // Header ist absolut positioniert ueber dem Hero — scrollt mit dem Hero weg.
+  // Schrift immer cream (passt zum dunklen Photo-Hero).
+  const fg = '#f5f2eb'
+  const fgMuted = 'rgba(245,242,235,0.65)'
 
   return (
     <>
       <header
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        className="absolute top-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: scrolled ? 'rgba(239, 237, 231, 0.82)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
-          borderBottom: scrolled
-            ? '1px solid var(--color-line)'
-            : '1px solid transparent',
+          backgroundColor: 'transparent',
         }}
       >
         <div className="mx-auto max-w-[1440px] px-6 lg:px-10 h-16 lg:h-20 flex items-center justify-between">
@@ -44,7 +31,7 @@ export function Header() {
             style={{
               fontFamily: 'var(--font-mono)',
               color: fg,
-              textShadow: onPhoto ? '0 1px 4px rgba(0,0,0,0.4)' : 'none',
+              textShadow: '0 1px 4px rgba(0,0,0,0.4)',
             }}
           >
             KLARWERK
@@ -66,7 +53,7 @@ export function Header() {
                   fontFamily: 'var(--font-mono)',
                   letterSpacing: '0.12em',
                   color: fgMuted,
-                  textShadow: onPhoto ? '0 1px 4px rgba(0,0,0,0.4)' : 'none',
+                  textShadow: '0 1px 4px rgba(0,0,0,0.4)',
                 }}
               >
                 {item.label}
@@ -78,10 +65,8 @@ export function Header() {
               style={{
                 fontFamily: 'var(--font-mono)',
                 letterSpacing: '0.12em',
-                backgroundColor: onPhoto ? '#f5f2eb' : 'var(--color-ink-primary)',
-                color: onPhoto
-                  ? 'var(--color-ink-primary)'
-                  : 'var(--color-bg-base)',
+                backgroundColor: '#f5f2eb',
+                color: 'var(--color-ink-primary)',
                 borderRadius: '2px',
               }}
             >
