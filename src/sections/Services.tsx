@@ -79,39 +79,23 @@ export function Services() {
   const sectionRef = useRef<HTMLElement>(null)
   const headRef = useRef<HTMLDivElement>(null)
   const scrollerRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const stRef = useRef<ScrollTrigger | null>(null)
   const reduced = useReducedMotion()
   const [active, setActive] = useState(0)
 
-  // ---------- ENTRANCE ANIMATIONS ----------
+  // ---------- HEAD reveal (laeuft bevor pin engaged) ----------
   useEffect(() => {
     if (!sectionRef.current) return
     const ctx = gsap.context(() => {
       if (reduced) return
-
-      // Section scrub — Card-Emerges-Effekt (yPercent 8 -> 0)
-      gsap.fromTo(
-        sectionRef.current,
-        { yPercent: 8 },
-        {
-          yPercent: 0,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top bottom',
-            end: 'top top',
-            scrub: 1.5,
-          },
-        }
-      )
-
-      // Head reveal
       const headEls = headRef.current?.children
       if (headEls) {
         gsap.from(headEls, {
           y: 36,
           opacity: 0,
-          duration: 1.4,
-          stagger: 0.18,
+          duration: 1.2,
+          stagger: 0.15,
           ease: 'expo.out',
           scrollTrigger: {
             trigger: sectionRef.current,
@@ -120,67 +104,87 @@ export function Services() {
           },
         })
       }
+    }, sectionRef)
+    return () => ctx.revert()
+  }, [reduced])
 
-      // Cards stagger from right
-      const cards = gsap.utils.toArray<HTMLElement>('[data-service-card]')
-      cards.forEach((card, i) => {
-        gsap.from(card, {
-          x: 60,
-          opacity: 0,
-          duration: 1.2,
-          delay: 0.4 + i * 0.12,
-          ease: 'expo.out',
+  // ---------- HORIZONTAL PIN-SCROLL ----------
+  // Vertikales Scrollen pinnt die Section und uebersetzt sich in horizontale
+  // Card-Translation. Nachdem alle Karten durchgangen sind, faehrt die Page
+  // normal weiter zur naechsten Section.
+  useEffect(() => {
+    if (!sectionRef.current || !trackRef.current || !scrollerRef.current) return
+
+    const ctx = gsap.context(() => {
+      const track = trackRef.current!
+      const scroller = scrollerRef.current!
+
+      if (reduced) {
+        // Reduced-Motion-Fallback: kein Pin, kein Scrub — Native Touch/Drag bleibt
+        scroller.style.overflowX = 'auto'
+        scroller.style.scrollSnapType = 'x mandatory'
+        return
+      }
+
+      // Pin nur ab >= 768px (Tablet+). Auf Mobile bleibt Native-Scroll.
+      const mm = gsap.matchMedia()
+      mm.add('(min-width: 768px)', () => {
+        const distance = () =>
+          Math.max(0, track.scrollWidth - scroller.clientWidth)
+
+        const tween = gsap.to(track, {
+          x: () => -distance(),
+          ease: 'none',
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: 'top 70%',
-            once: true,
+            start: 'top top',
+            end: () => `+=${distance() + 200}`,
+            pin: true,
+            scrub: 1,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              const idx = Math.min(
+                Math.round(self.progress * (SERVICES.length - 1)),
+                SERVICES.length - 1
+              )
+              setActive(idx)
+            },
           },
         })
+        stRef.current = tween.scrollTrigger ?? null
+
+        return () => {
+          stRef.current = null
+        }
+      })
+
+      mm.add('(max-width: 767px)', () => {
+        scroller.style.overflowX = 'auto'
+        scroller.style.scrollSnapType = 'x mandatory'
       })
     }, sectionRef)
     return () => ctx.revert()
   }, [reduced])
 
-  // ---------- ACTIVE CARD DETECTION (IntersectionObserver) ----------
-  useEffect(() => {
-    if (!scrollerRef.current) return
-    const cards = Array.from(
-      scrollerRef.current.querySelectorAll<HTMLElement>('[data-service-card]')
-    )
-    if (cards.length === 0) return
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        // Find the entry with the largest intersection ratio
-        let bestRatio = 0
-        let bestIndex = active
-        entries.forEach((entry) => {
-          if (entry.intersectionRatio > bestRatio) {
-            bestRatio = entry.intersectionRatio
-            const idx = cards.indexOf(entry.target as HTMLElement)
-            if (idx >= 0) bestIndex = idx
-          }
-        })
-        if (bestRatio > 0) setActive(bestIndex)
-      },
-      {
-        root: scrollerRef.current,
-        threshold: [0.4, 0.6, 0.8, 1.0],
-      }
-    )
-    cards.forEach((c) => io.observe(c))
-    return () => io.disconnect()
-  }, [active])
-
+  // Pagination-Button -> Scroll auf die entsprechende Karte
   const scrollToCard = (index: number) => {
+    const st = stRef.current
+    if (st) {
+      // Pin-Mode (Desktop/Tablet) — berechne absolute Scroll-Position
+      const progress = SERVICES.length > 1 ? index / (SERVICES.length - 1) : 0
+      const targetY = st.start + (st.end - st.start) * progress
+      window.scrollTo({ top: targetY, behavior: 'smooth' })
+      return
+    }
+    // Mobile / Reduced-Motion-Fallback — Native horizontal scroll
     const scroller = scrollerRef.current
     if (!scroller) return
     const card = scroller.querySelectorAll<HTMLElement>('[data-service-card]')[
       index
     ]
     if (!card) return
-    const targetLeft = card.offsetLeft - 24
-    scroller.scrollTo({ left: targetLeft, behavior: 'smooth' })
+    scroller.scrollTo({ left: card.offsetLeft - 24, behavior: 'smooth' })
   }
 
   return (
@@ -301,26 +305,39 @@ export function Services() {
           </h2>
         </div>
 
-        {/* CAROUSEL */}
+        {/* CAROUSEL — Scroller mit overflow:hidden, Track wird via GSAP horizontal translatet.
+            Auf Mobile (< 768px) faellt der Hook automatisch auf overflow-x:auto + scroll-snap zurueck. */}
         <div className="flex-1 flex items-center mt-6 lg:mt-8" style={{ minHeight: 0 }}>
           <div
             ref={scrollerRef}
-            className="flex gap-4 lg:gap-5 w-full h-full overflow-x-auto"
+            className="w-full h-full"
             style={{
-              scrollSnapType: 'x mandatory',
-              scrollPaddingLeft: '24px',
-              paddingLeft: 'max(24px, calc((100vw - var(--container-max)) / 2 + 24px))',
-              paddingRight: 'max(24px, calc((100vw - var(--container-max)) / 2 + 24px))',
+              overflowX: 'hidden',
+              overflowY: 'hidden',
               WebkitOverflowScrolling: 'touch',
             }}
           >
-            {SERVICES.map((service, i) => (
-              <ServiceCard
-                key={service.slug}
-                service={service}
-                isActive={active === i}
-              />
-            ))}
+            <div
+              ref={trackRef}
+              className="flex gap-4 lg:gap-5 h-full"
+              style={{
+                willChange: 'transform',
+                paddingLeft:
+                  'max(24px, calc((100vw - var(--container-max)) / 2 + 24px))',
+                paddingRight:
+                  'max(24px, calc((100vw - var(--container-max)) / 2 + 24px))',
+                scrollSnapType: 'none', // wird auf Mobile per JS gesetzt
+                width: 'max-content',
+              }}
+            >
+              {SERVICES.map((service, i) => (
+                <ServiceCard
+                  key={service.slug}
+                  service={service}
+                  isActive={active === i}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
