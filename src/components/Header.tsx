@@ -19,12 +19,18 @@ export function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  // Im Top-Bereich liegt der Header ueber dem dunklen Photo-Hero → helle Schrift.
+  // Sobald gescrollt, wechselt er auf cream-blur + dunkle Schrift fuer Sections darunter.
+  const onPhoto = !scrolled
+  const fg = onPhoto ? '#f5f2eb' : 'var(--color-ink-primary)'
+  const fgMuted = onPhoto ? 'rgba(245,242,235,0.6)' : 'var(--color-ink-secondary)'
+
   return (
     <>
       <header
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         style={{
-          backgroundColor: scrolled ? 'rgba(239, 237, 231, 0.78)' : 'transparent',
+          backgroundColor: scrolled ? 'rgba(239, 237, 231, 0.82)' : 'transparent',
           backdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
           borderBottom: scrolled
             ? '1px solid var(--color-line)'
@@ -34,16 +40,17 @@ export function Header() {
         <div className="mx-auto max-w-[1440px] px-6 lg:px-10 h-16 lg:h-20 flex items-center justify-between">
           <a
             href="#hero"
-            className="font-bold tracking-[0.04em] text-sm lg:text-base"
+            className="font-bold tracking-[0.04em] text-sm lg:text-base transition-colors duration-300"
             style={{
               fontFamily: 'var(--font-mono)',
-              color: 'var(--color-ink-primary)',
+              color: fg,
+              textShadow: onPhoto ? '0 1px 4px rgba(0,0,0,0.4)' : 'none',
             }}
           >
             KLARWERK
             <span
-              className="ml-2 hidden sm:inline-block"
-              style={{ color: 'var(--color-ink-muted)', fontWeight: 400 }}
+              className="ml-2 hidden sm:inline-block transition-colors duration-300"
+              style={{ color: fgMuted, fontWeight: 400 }}
             >
               ✦ MÜNSTER
             </span>
@@ -58,7 +65,8 @@ export function Header() {
                 style={{
                   fontFamily: 'var(--font-mono)',
                   letterSpacing: '0.12em',
-                  color: 'var(--color-ink-secondary)',
+                  color: fgMuted,
+                  textShadow: onPhoto ? '0 1px 4px rgba(0,0,0,0.4)' : 'none',
                 }}
               >
                 {item.label}
@@ -70,8 +78,10 @@ export function Header() {
               style={{
                 fontFamily: 'var(--font-mono)',
                 letterSpacing: '0.12em',
-                backgroundColor: 'var(--color-ink-primary)',
-                color: 'var(--color-bg-base)',
+                backgroundColor: onPhoto ? '#f5f2eb' : 'var(--color-ink-primary)',
+                color: onPhoto
+                  ? 'var(--color-ink-primary)'
+                  : 'var(--color-bg-base)',
                 borderRadius: '2px',
               }}
             >
@@ -90,7 +100,7 @@ export function Header() {
               <span
                 className="absolute left-0 right-0 h-[1.5px] transition-all duration-300"
                 style={{
-                  backgroundColor: 'var(--color-ink-primary)',
+                  backgroundColor: fg,
                   top: open ? '50%' : '0',
                   transform: open
                     ? 'translateY(-50%) rotate(45deg)'
@@ -100,7 +110,7 @@ export function Header() {
               <span
                 className="absolute left-0 right-0 h-[1.5px] transition-all duration-300"
                 style={{
-                  backgroundColor: 'var(--color-ink-primary)',
+                  backgroundColor: fg,
                   top: '50%',
                   transform: 'translateY(-50%)',
                   opacity: open ? 0 : 1,
@@ -109,7 +119,7 @@ export function Header() {
               <span
                 className="absolute left-0 right-0 h-[1.5px] transition-all duration-300"
                 style={{
-                  backgroundColor: 'var(--color-ink-primary)',
+                  backgroundColor: fg,
                   bottom: open ? '50%' : '0',
                   transform: open
                     ? 'translateY(50%) rotate(-45deg)'
