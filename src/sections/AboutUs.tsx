@@ -66,11 +66,11 @@ export function AboutUs() {
     const ctx = gsap.context(() => {
       if (reduced) return
 
-      // 1) SECTION SCRUB — Section "rises" from below as it enters viewport
-      //    (während Hero parallax-out scrolt, hebt sich About sanft hoch)
+      // 1) SECTION SCRUB — Section "rises" from below as it enters viewport.
+      //    Hoeherer scrub-Wert = traegere, sichtbarere Bewegung beim Scrollen.
       gsap.fromTo(
         sectionRef.current,
-        { yPercent: 6 },
+        { yPercent: 8 },
         {
           yPercent: 0,
           ease: 'none',
@@ -78,35 +78,37 @@ export function AboutUs() {
             trigger: sectionRef.current,
             start: 'top bottom',
             end: 'top top',
-            scrub: 0.8,
+            scrub: 1.5,
           },
         }
       )
 
-      // 2) HEAD reveal — Eyebrow + Title staggern beim Eintritt von unten rein
+      // 2) HEAD reveal — Eyebrow + Title staggern langsam beim Eintritt rein.
+      //    Triggert frueh (top 78%) damit man sie vor und beim Stop sieht.
       const headElements = headRef.current?.children
       if (headElements) {
         gsap.from(headElements, {
-          y: 28,
+          y: 36,
           opacity: 0,
-          duration: 0.85,
-          stagger: 0.08,
+          duration: 1.4,
+          stagger: 0.18,
           ease: 'expo.out',
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: 'top 70%',
+            start: 'top 78%',
             once: true,
           },
         })
       }
 
-      // 3) BENTO Cards Magic-Mosaik
+      // 3) BENTO Cards Magic-Mosaik — jede Karte sichtbar einzeln ankommen.
+      //    Grosser Stagger (220ms) macht die Reihenfolge wahrnehmbar.
       const cards = gsap.utils.toArray<HTMLElement>('[data-bento-card]')
       const dirs = [
-        { x: -32, y: 0 },
-        { x: 0, y: -28 },
-        { x: 0, y: 28 },
-        { x: 32, y: 0 },
+        { x: -50, y: 0 },
+        { x: 0, y: -40 },
+        { x: 0, y: 40 },
+        { x: 50, y: 0 },
       ]
       cards.forEach((card, i) => {
         const d = dirs[i % dirs.length]
@@ -114,18 +116,18 @@ export function AboutUs() {
           x: d.x,
           y: d.y,
           opacity: 0,
-          duration: 0.9,
-          delay: i * 0.05,
+          duration: 1.5,
+          delay: 0.3 + i * 0.22,
           ease: 'expo.out',
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: 'top 60%',
+            start: 'top 70%',
             once: true,
           },
         })
       })
 
-      // 4) Pull-Quote Wort-Stagger
+      // 4) Pull-Quote Wort-Stagger — gemaechlich, Lese-Tempo.
       const quote = sectionRef.current?.querySelector<HTMLElement>(
         '[data-mission-quote]'
       )
@@ -143,18 +145,18 @@ export function AboutUs() {
         gsap.to(quote.children, {
           opacity: 1,
           y: 0,
-          duration: 0.65,
+          duration: 1.0,
           ease: 'expo.out',
-          stagger: 0.045,
+          stagger: 0.09,
           scrollTrigger: {
             trigger: quote,
-            start: 'top 85%',
+            start: 'top 88%',
             once: true,
           },
         })
       }
 
-      // 5) Counter-Animation auf Stats
+      // 5) Counter-Animation — laenger zaehlend, sichtbar bis zur Endzahl.
       const counters = gsap.utils.toArray<HTMLElement>('[data-counter]')
       counters.forEach((el) => {
         const target = parseFloat(el.dataset.counter || '0')
@@ -162,14 +164,14 @@ export function AboutUs() {
         const proxy = { v: 0 }
         gsap.to(proxy, {
           v: target,
-          duration: 1.6,
+          duration: 2.6,
           ease: 'expo.out',
           onUpdate: () => {
             el.textContent = proxy.v.toFixed(decimals).replace('.', ',')
           },
           scrollTrigger: {
             trigger: el,
-            start: 'top 90%',
+            start: 'top 92%',
             once: true,
           },
         })
