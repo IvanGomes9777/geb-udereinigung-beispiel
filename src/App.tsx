@@ -1,5 +1,6 @@
 import { Header } from './components/Header'
 import { Hero } from './sections/Hero'
+import { AboutUs } from './sections/AboutUs'
 import { useSmoothScroll } from './hooks/useSmoothScroll'
 
 export default function App() {
@@ -10,7 +11,8 @@ export default function App() {
       <Header />
       <main>
         <Hero />
-        {/* Placeholder area to allow scroll past hero */}
+        <AboutUs />
+        {/* Placeholder for upcoming sections */}
         <section
           aria-hidden
           style={{
@@ -32,7 +34,7 @@ export default function App() {
               textAlign: 'center',
             }}
           >
-            N° 02 — ÜBER UNS · in Vorbereitung · wartet auf Layout-Freigabe
+            N° 03 — LEISTUNGEN · in Vorbereitung
           </p>
         </section>
       </main>
