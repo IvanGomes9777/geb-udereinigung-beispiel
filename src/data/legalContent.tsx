@@ -124,25 +124,6 @@ export const IMPRESSUM: { title: string; lastUpdated: string; sections: LegalSec
       ),
     },
     {
-      heading: 'EU-Streitschlichtungsplattform',
-      body: (
-        <p>
-          Die Europäische Kommission stellt eine Plattform zur
-          Online-Streitbeilegung (OS) bereit:{' '}
-          <a
-            href="https://ec.europa.eu/consumers/odr/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            ec.europa.eu/consumers/odr/
-          </a>
-          .
-          <br />
-          Unsere E-Mail-Adresse finden Sie oben im Impressum.
-        </p>
-      ),
-    },
-    {
       heading: 'Haftungsausschluss',
       body: (
         <>
